@@ -17,16 +17,18 @@
         android:textColor="@color/white"
         android:paddingStart="16dp"
         android:paddingEnd="0dp"
+        android:paddingTop="20dp"
         android:textSize="22sp" />
 
     <Button
+        android:id="@+id/button_search"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:foreground="?attr/selectableItemBackground"
         android:layout_marginStart="16dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="16dp"
-
         android:backgroundTint="@color/white"
         android:text="@string/button_search"
         android:textColor="#1A1B22"
@@ -37,11 +39,13 @@
         app:iconGravity="textStart"/>
 
     <Button
+        android:id="@+id/button_media"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_weight="1"
+        android:foreground="?attr/selectableItemBackground"
         android:backgroundTint="@color/white"
         android:text="@string/button_media"
         android:textColor="#1A1B22"
@@ -52,12 +56,14 @@
         app:iconGravity="textStart"/>
 
     <Button
+        android:id="@+id/button_settings"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="20dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_weight="1"
+        android:foreground="?attr/selectableItemBackground"
         android:backgroundTint="@color/white"
         android:text="@string/button_settings"
         android:textColor="#1A1B22"

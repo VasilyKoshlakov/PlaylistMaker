@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        tools:layout_editor_absoluteX="41dp"
+        tools:layout_editor_absoluteY="328dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -59,7 +59,7 @@
                     android:paddingStart="16dp"
                     android:text="@string/dark_mode"
                     android:textColor="@color/black"
-                    android:textSize="16sp"/>
+                    android:textSize="16sp" />
 
 
                 <Switch
