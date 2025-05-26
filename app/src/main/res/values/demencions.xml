@@ -2,5 +2,6 @@
 <resources>
     <dimen name="medium_pudding">20dp</dimen>
     <dimen name="primary_text_size">16sp</dimen>
+    <dimen name="main_text_size">22sp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
 </resources>

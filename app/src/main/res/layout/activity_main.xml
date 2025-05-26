@@ -31,9 +31,10 @@
         android:layout_marginEnd="16dp"
         android:backgroundTint="@color/white"
         android:text="@string/button_search"
+        android:textSize="@dimen/main_text_size"
         android:textColor="@color/black"
         app:cornerRadius="@dimen/all_corner_radius"
-        app:icon="@drawable/light_mode_search"
+        app:icon="@drawable/ic_search_24"
         app:iconTint="@color/black"
         android:textAllCaps="false"
         app:iconGravity="textStart"/>
@@ -45,15 +46,16 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_weight="1"
-        android:foreground="?attr/selectableItemBackground"
         android:backgroundTint="@color/white"
+        android:foreground="?attr/selectableItemBackground"
         android:text="@string/button_media"
-        android:textColor="@color/black"
         android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="@dimen/main_text_size"
         app:cornerRadius="@dimen/all_corner_radius"
-        app:icon="@drawable/light_mode_media"
-        app:iconTint="@color/black"
-        app:iconGravity="textStart"/>
+        app:icon="@drawable/ic_media_24"
+        app:iconGravity="textStart"
+        app:iconTint="@color/black" />
 
     <Button
         android:id="@+id/button_settings"
@@ -66,10 +68,11 @@
         android:foreground="?attr/selectableItemBackground"
         android:backgroundTint="@color/white"
         android:text="@string/button_settings"
+        android:textSize="@dimen/main_text_size"
         android:textColor="@color/black"
         android:textAllCaps="false"
         app:cornerRadius="@dimen/all_corner_radius"
-        app:icon="@drawable/light_mode_settings"
+        app:icon="@drawable/ic_settings_24"
         app:iconTint="@color/black"
         app:iconGravity="textStart" />
 
