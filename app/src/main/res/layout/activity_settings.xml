@@ -3,30 +3,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        tools:layout_editor_absoluteY="0dp"
+        android:backgroundTint="?attr/colorSecondary">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/button_back_settings"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:backgroundTint="@color/white"
-                android:contentDescription="@string/todo"
-                android:foreground="?attr/selectableItemBackground"
-                android:src="@drawable/ic_settings_back_48"
-                app:iconTint="@color/black" />
+                android:src="@drawable/ic_settings_back_2"
+                style="@style/ImageViewSettingsStyle"
+                />
 
 
             <TextView
@@ -35,17 +33,18 @@
                 android:gravity="center_vertical"
                 android:paddingStart="16dp"
                 android:text="@string/button_settings"
-                android:textColor="@color/black"
-                android:textSize="22sp" />
+                style="@style/TextSettingsStyle"
+                android:textSize="22sp"
+                android:fontFamily="@font/ys_display_medium"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:background="@color/white"
             android:orientation="vertical"
-            android:paddingTop="40dp">
+            android:paddingTop="40dp"
+            android:backgroundTint="?attr/colorSecondary">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -53,15 +52,12 @@
                 android:layout_weight="1">
 
                 <TextView
+                    style="@style/TextSettingsStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="start"
-                    android:contentDescription="TODO"
-                    android:gravity="center_vertical"
                     android:paddingStart="16dp"
-                    android:text="@string/dark_mode"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/primary_text_size" />
+                    android:text="@string/dark_mode"/>
 
 
                 <Switch
@@ -80,22 +76,15 @@
                 android:layout_weight="1">
 
                 <TextView
+                    style="@style/TextSettingsStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="start"
-                    android:gravity="center_vertical"
                     android:paddingStart="16dp"
-                    android:text="@string/share_app"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/primary_text_size" />
+                    android:text="@string/share_app"/>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="26dp"
-                    android:backgroundTint="@color/white"
+                    style="@style/ImageViewIconSettingsStyle"
                     android:src="@drawable/ic_share_24" />
 
             </FrameLayout>
@@ -107,24 +96,15 @@
                 tools:ignore="ExtraText">
 
                 <TextView
+                    style="@style/TextSettingsStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:importantForAccessibility="no"
                     android:paddingStart="16dp"
-                    android:text="@string/write_to_support"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/primary_text_size" />
+                    android:text="@string/write_to_support" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="26dp"
-                    android:backgroundTint="@color/white"
-                    android:src="@drawable/ic_support_24"
-                    app:iconTint="@color/grey" />
+                    style="@style/ImageViewIconSettingsStyle"
+                    android:src="@drawable/ic_support_24" />
 
             </FrameLayout>
 
@@ -135,22 +115,14 @@
                 android:backgroundTint="@color/white">
 
                 <TextView
+                    style="@style/TextSettingsStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:contentDescription="TODO"
-                    android:gravity="center_vertical"
                     android:paddingStart="16dp"
-                    android:text="@string/user_agreement"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/primary_text_size" />
+                    android:text="@string/user_agreement" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="26dp"
-                    android:backgroundTint="@color/white"
+                    style="@style/ImageViewIconSettingsStyle"
                     android:src="@drawable/ic_arrow_forward_24"/>
 
             </FrameLayout>
