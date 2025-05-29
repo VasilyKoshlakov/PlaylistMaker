@@ -10,4 +10,9 @@
     <string name="write_to_support">Написать в поддержку</string>
     <string name="user_agreement">Пользовательское соглашение</string>
     <string name="todo">TODO</string>
+    <string name="share_message">Посмотрите курс по Android-разработке в Практикуме: https://practicum.yandex.ru/android-developer/</string>
+    <string name="email_subject">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
+    <string name="email_body">Спасибо разработчикам и разработчицам за крутое приложение!</string>
+    <string name="email_chooser_title">Отправить письмо через...</string>
+    <string name="user_agreement_url">https://yandex.ru/legal/praktikum_offer/</string>
 </resources>

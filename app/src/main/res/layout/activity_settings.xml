@@ -71,6 +71,7 @@
             </FrameLayout>
 
             <FrameLayout
+
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1">
@@ -84,6 +85,7 @@
                     android:text="@string/share_app"/>
 
                 <ImageView
+                    android:id="@+id/share_app_button"
                     style="@style/ImageViewIconSettingsStyle"
                     android:src="@drawable/ic_share_24" />
 
@@ -103,6 +105,7 @@
                     android:text="@string/write_to_support" />
 
                 <ImageView
+                    android:id="@+id/write_to_support_button"
                     style="@style/ImageViewIconSettingsStyle"
                     android:src="@drawable/ic_support_24" />
 
@@ -122,6 +125,7 @@
                     android:text="@string/user_agreement" />
 
                 <ImageView
+                    android:id="@+id/user_agreement_button"
                     style="@style/ImageViewIconSettingsStyle"
                     android:src="@drawable/ic_arrow_forward_24"/>
 
