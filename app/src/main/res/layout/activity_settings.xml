@@ -10,8 +10,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp"
-        android:backgroundTint="?attr/colorSecondary">
+        tools:layout_editor_absoluteY="0dp" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,9 +21,8 @@
                 android:id="@+id/button_back_settings"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:src="@drawable/ic_settings_back_2"
-                style="@style/ImageViewSettingsStyle"
-                />
+                android:src="@drawable/ic_back_24"
+                style="@style/ImageViewSettingsStyle" />
 
 
             <TextView
@@ -32,7 +30,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:paddingStart="16dp"
-                android:text="@string/button_settings"
+                android:text="@string/settings"
                 style="@style/TextSettingsStyle"
                 android:textSize="22sp"
                 android:fontFamily="@font/ys_display_medium"/>
@@ -43,8 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:orientation="vertical"
-            android:paddingTop="40dp"
-            android:backgroundTint="?attr/colorSecondary">
+            android:paddingTop="40dp" >
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -61,6 +58,7 @@
 
 
                 <Switch
+                    style="@style/CustomSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
                     android:layout_gravity="end"
@@ -114,8 +112,7 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white">
+                android:layout_weight="1" >
 
                 <TextView
                     style="@style/TextSettingsStyle"

@@ -12,10 +12,11 @@ class SettingsActivity : AppCompatActivity() {
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
         val settingsBackButton = findViewById<ImageView>(R.id.button_back_settings)
-            val shareAppButton = findViewById<ImageView>(R.id.share_app_button)
-            val writeToSupportButton = findViewById<ImageView>(R.id.write_to_support_button)
-            val userAgreementButton = findViewById<ImageView>(R.id.user_agreement_button)
+        val shareAppButton = findViewById<ImageView>(R.id.share_app_button)
+        val writeToSupportButton = findViewById<ImageView>(R.id.write_to_support_button)
+        val userAgreementButton = findViewById<ImageView>(R.id.user_agreement_button)
 
         settingsBackButton.setOnClickListener {
             finish()
