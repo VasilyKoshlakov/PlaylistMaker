@@ -59,11 +59,12 @@
 
                 <Switch
                     style="@style/CustomSwitch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
+                    android:layout_width="55dp"
+                    android:layout_height="match_parent"
                     android:layout_gravity="end"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="16dp"
+
+
+                    android:layoutDirection="rtl"
                     tools:ignore="UseSwitchCompatOrMaterialXml" />
 
             </FrameLayout>

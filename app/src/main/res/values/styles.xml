@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="ButtonMainStyle"> parent="Widget.MaterialComponents.Button.UnelevatedButton"
+    <style name="ButtonMainStyle" parent="Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="android:foreground">?attr/selectableItemBackground</item>
         <item name="android:backgroundTint">@color/white</item>
         <item name="android:textSize">@dimen/main_text_size</item>

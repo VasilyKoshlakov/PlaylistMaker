@@ -79,12 +79,14 @@
 
             <ImageView
                 android:id="@+id/clearIcon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="end"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
                 style="@style/ImageViewIconSearchStyle"
-                android:visibility="gone" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:src="@drawable/ic_clear_16"
+                android:paddingRight="10dp"
+                android:paddingTop="10dp"
+                android:visibility="visible" />
         </FrameLayout>
 
     </LinearLayout>

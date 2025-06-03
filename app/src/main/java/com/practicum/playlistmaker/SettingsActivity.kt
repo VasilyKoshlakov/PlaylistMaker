@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class SettingsActivity : AppCompatActivity() {
-        override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
@@ -23,16 +23,17 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         shareAppButton.setOnClickListener {
-                shareApp()
+            shareApp()
         }
         writeToSupportButton.setOnClickListener {
-                writeToSupport()
+            writeToSupport()
         }
 
         userAgreementButton.setOnClickListener {
-                openUserAgreement()
+            openUserAgreement()
         }
     }
+
     private fun shareApp() {
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
@@ -44,15 +45,21 @@ class SettingsActivity : AppCompatActivity() {
     private fun writeToSupport() {
         val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
-            putExtra(Intent.EXTRA_EMAIL, arrayOf("KoshlakovVV@yandex.ru"))
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.support_email)))
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject))
             putExtra(Intent.EXTRA_TEXT, getString(R.string.email_body))
         }
 
         try {
-            startActivity(Intent.createChooser(emailIntent, getString(R.string.email_chooser_title)))
+            startActivity(
+                Intent.createChooser(
+                    emailIntent,
+                    getString(R.string.email_chooser_title)
+                )
+            )
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "На устройстве не найден почтовый клиент", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "На устройстве не найден почтовый клиент", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 

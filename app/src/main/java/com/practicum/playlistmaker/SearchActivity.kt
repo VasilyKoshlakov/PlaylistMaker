@@ -16,10 +16,6 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearButton: ImageView
     private var searchQuery: String = ""
 
-    companion object {
-        private const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
@@ -92,5 +88,8 @@ class SearchActivity : AppCompatActivity() {
     private fun hideKeyboard() {
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
+    }
+    companion object {
+        private const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
     }
 }
