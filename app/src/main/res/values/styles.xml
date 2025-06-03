@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <style name="LayoutFirstActivity">
+        <item name="android:background">@color/blue</item>
+    </style>
+
+    <style name="LayoutOtherActivity">
+        <item name="android:background">@color/white</item>
+    </style>
+
     <style name="ButtonMainStyle" parent="Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="android:foreground">?attr/selectableItemBackground</item>
         <item name="android:backgroundTint">@color/white</item>

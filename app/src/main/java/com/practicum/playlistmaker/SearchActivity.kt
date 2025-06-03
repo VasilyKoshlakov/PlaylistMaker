@@ -7,8 +7,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 class SearchActivity : AppCompatActivity() {
 
@@ -47,13 +47,12 @@ class SearchActivity : AppCompatActivity() {
                     searchQuery = it.toString()
                     clearButton.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
 
-                    if (it.isNotEmpty()) {
-                        Toast.makeText(
-                            this@SearchActivity,
-                            "Вы ввели: $it",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    val textColor = if (it.isEmpty()) {
+                        DEFAULT_TEXT_COLOR
+                    } else {
+                        TYPED_TEXT_COLOR
                     }
+                    inputEditText.setTextColor(ContextCompat.getColor(this@SearchActivity, textColor))
                 }
             }
 
@@ -91,5 +90,7 @@ class SearchActivity : AppCompatActivity() {
     }
     companion object {
         private const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
+        private val DEFAULT_TEXT_COLOR = R.color.grey
+        private val TYPED_TEXT_COLOR = R.color.black
     }
 }
