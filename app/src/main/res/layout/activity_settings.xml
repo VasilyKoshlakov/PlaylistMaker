@@ -3,30 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        tools:layout_editor_absoluteY="0dp"
+        style="@style/LayoutOtherActivity">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/button_back_settings"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:backgroundTint="@color/white"
-                android:contentDescription="@string/todo"
-                android:foreground="?attr/selectableItemBackground"
-                android:src="@drawable/ic_settings_back_48"
-                app:iconTint="@color/black" />
+                android:src="@drawable/ic_back_24"
+                style="@style/ImageViewSettingsStyle" />
 
 
             <TextView
@@ -34,18 +31,18 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:paddingStart="16dp"
-                android:text="@string/button_settings"
-                android:textColor="@color/black"
-                android:textSize="22sp" />
+                android:text="@string/settings"
+                style="@style/TextSettingsStyle"
+                android:textSize="22sp"
+                android:fontFamily="@font/ys_display_medium"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:background="@color/white"
             android:orientation="vertical"
-            android:paddingTop="40dp">
+            android:paddingTop="40dp" >
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -53,49 +50,43 @@
                 android:layout_weight="1">
 
                 <TextView
+                    style="@style/TextSettingsStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="start"
-                    android:contentDescription="TODO"
-                    android:gravity="center_vertical"
                     android:paddingStart="16dp"
-                    android:text="@string/dark_mode"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/primary_text_size" />
+                    android:text="@string/dark_mode"/>
 
 
                 <Switch
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
+                    style="@style/CustomSwitch"
+                    android:layout_width="55dp"
+                    android:layout_height="match_parent"
                     android:layout_gravity="end"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="16dp"
+
+
+                    android:layoutDirection="rtl"
                     tools:ignore="UseSwitchCompatOrMaterialXml" />
 
             </FrameLayout>
 
             <FrameLayout
+
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1">
 
                 <TextView
+                    style="@style/TextSettingsStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="start"
-                    android:gravity="center_vertical"
                     android:paddingStart="16dp"
-                    android:text="@string/share_app"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/primary_text_size" />
+                    android:text="@string/share_app"/>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="26dp"
-                    android:backgroundTint="@color/white"
+                    android:id="@+id/share_app_button"
+                    style="@style/ImageViewIconSettingsStyle"
                     android:src="@drawable/ic_share_24" />
 
             </FrameLayout>
@@ -107,50 +98,34 @@
                 tools:ignore="ExtraText">
 
                 <TextView
+                    style="@style/TextSettingsStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:importantForAccessibility="no"
                     android:paddingStart="16dp"
-                    android:text="@string/write_to_support"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/primary_text_size" />
+                    android:text="@string/write_to_support" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="26dp"
-                    android:backgroundTint="@color/white"
-                    android:src="@drawable/ic_support_24"
-                    app:iconTint="@color/grey" />
+                    android:id="@+id/write_to_support_button"
+                    style="@style/ImageViewIconSettingsStyle"
+                    android:src="@drawable/ic_support_24" />
 
             </FrameLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white">
+                android:layout_weight="1" >
 
                 <TextView
+                    style="@style/TextSettingsStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:contentDescription="TODO"
-                    android:gravity="center_vertical"
                     android:paddingStart="16dp"
-                    android:text="@string/user_agreement"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/primary_text_size" />
+                    android:text="@string/user_agreement" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="26dp"
-                    android:backgroundTint="@color/white"
+                    android:id="@+id/user_agreement_button"
+                    style="@style/ImageViewIconSettingsStyle"
                     android:src="@drawable/ic_arrow_forward_24"/>
 
             </FrameLayout>
