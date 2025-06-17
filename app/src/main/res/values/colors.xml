@@ -7,5 +7,6 @@
     <color name="grey_light">#E6E8EB</color>
     <color name="blue_light">#9FBBF3</color>
     <color name="dark_mode">#1A1B22</color>
+    <color name="text_grey">#AEAFB4</color>
 
 </resources>
