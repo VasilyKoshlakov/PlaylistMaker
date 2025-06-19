@@ -15,4 +15,5 @@
     <string name="email_chooser_title">Отправить письмо через...</string>
     <string name="user_agreement_url">https://yandex.ru/legal/praktikum_offer/</string>
     <string name="support_email">KoshlakovVV@yandex.ru</string>
+    <string name="artwork">Album artwork</string>
 </resources>
