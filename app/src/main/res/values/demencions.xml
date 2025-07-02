@@ -5,4 +5,5 @@
     <dimen name="main_text_size">22sp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="artwork_size">45dp</dimen>
+    <dimen name="artwork_corner_radius">2dp</dimen>
 </resources>

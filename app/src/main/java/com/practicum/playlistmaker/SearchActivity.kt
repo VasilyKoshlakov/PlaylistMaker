@@ -1,16 +1,23 @@
 package com.practicum.playlistmaker
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SearchActivity : AppCompatActivity() {
 
@@ -18,7 +25,13 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearButton: ImageView
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TrackAdapter
+    private lateinit var placeholder: View
+    private lateinit var placeholderImage: ImageView
+    private lateinit var refreshButton: Button
+    private lateinit var errorMessage: TextView
+
     private var searchQuery: String = ""
+    private var lastSearchQuery: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +42,7 @@ class SearchActivity : AppCompatActivity() {
         setupBackButton()
         setupClearButton()
         setupSearchEditText()
+        setupPlaceholder()
 
         if (savedInstanceState != null) {
             restoreState(savedInstanceState)
@@ -39,12 +53,83 @@ class SearchActivity : AppCompatActivity() {
         inputEditText = findViewById(R.id.inputEditText)
         clearButton = findViewById(R.id.clearIcon)
         recyclerView = findViewById(R.id.tracks_recycler_view)
+        placeholder = findViewById(R.id.placeholder)
+        placeholderImage = findViewById(R.id.placeholderImage)
+        refreshButton = findViewById(R.id.refreshButton)
+        errorMessage = findViewById(R.id.errorMessage)
     }
 
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = TrackAdapter(createSampleTracks())
+        adapter = TrackAdapter(emptyList()) { _ ->
+        }
         recyclerView.adapter = adapter
+    }
+
+    private fun setupPlaceholder() {
+        refreshButton.setOnClickListener {
+            performSearch(lastSearchQuery)
+        }
+    }
+
+    private fun showPlaceholder(isError: Boolean = false) {
+        recyclerView.visibility = View.GONE
+        placeholder.visibility = View.VISIBLE
+
+        if (isError) {
+            val connectionProblemIcon = when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                Configuration.UI_MODE_NIGHT_YES -> R.drawable.connection_problem_dark_mode_120
+                else -> R.drawable.connection_problem_light_mode_120
+            }
+            placeholderImage.setImageResource(connectionProblemIcon)
+            errorMessage.text = getString(R.string.connection_error)
+            refreshButton.visibility = View.VISIBLE
+        } else {
+            val notFoundIcon = when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                Configuration.UI_MODE_NIGHT_YES -> R.drawable.not_found_dark_mode_120
+                else -> R.drawable.not_found_light_mode_120
+            }
+            placeholderImage.setImageResource(notFoundIcon)
+            errorMessage.text = getString(R.string.nothing_found)
+            refreshButton.visibility = View.GONE
+        }
+    }
+
+    private fun hidePlaceholder() {
+        placeholder.visibility = View.GONE
+        recyclerView.visibility = View.VISIBLE
+    }
+
+    private fun performSearch(query: String) {
+        if (query.isEmpty()) {
+            adapter.updateTracks(emptyList())
+            showPlaceholder()
+            return
+        }
+
+        lastSearchQuery = query
+        hidePlaceholder()
+
+        RetrofitClient.itunesApiService.search(query).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful) {
+                    response.body()?.let { apiResponse ->
+                        if (apiResponse.results.isEmpty()) {
+                            showPlaceholder()
+                        } else {
+                            adapter.updateTracks(apiResponse.results)
+                            hidePlaceholder()
+                        }
+                    } ?: showPlaceholder(true)
+                } else {
+                    showPlaceholder(true)
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                showPlaceholder(true)
+            }
+        })
     }
 
     private fun setupBackButton() {
@@ -58,6 +143,9 @@ class SearchActivity : AppCompatActivity() {
             inputEditText.setText("")
             hideKeyboard()
             searchQuery = ""
+            clearButton.visibility = View.GONE
+            adapter.updateTracks(emptyList())
+            showPlaceholder()
         }
     }
 
@@ -69,13 +157,12 @@ class SearchActivity : AppCompatActivity() {
                 s?.let {
                     searchQuery = it.toString()
                     clearButton.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
-
-                    val textColor = if (it.isEmpty()) {
-                        DEFAULT_TEXT_COLOR
-                    } else {
-                        TYPED_TEXT_COLOR
-                    }
-                    inputEditText.setTextColor(ContextCompat.getColor(this@SearchActivity, textColor))
+                    inputEditText.setTextColor(
+                        ContextCompat.getColor(
+                            this@SearchActivity,
+                            if (it.isEmpty()) R.color.grey else R.color.black
+                        )
+                    )
                 }
             }
 
@@ -83,47 +170,22 @@ class SearchActivity : AppCompatActivity() {
         })
 
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
+            if (hasFocus && inputEditText.text.isNotEmpty()) {
                 showKeyboard()
             }
         }
 
-        inputEditText.requestFocus()
-    }
+        inputEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                performSearch(searchQuery)
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
 
-    private fun createSampleTracks(): List<Track> {
-        return listOf(
-            Track(
-                "Smells Like Teen Spirit",
-                "Nirvana",
-                "5:01",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music115/v4/7b/58/c2/7b58c21a-2b51-2bb2-e59a-9bb9b96ad8c3/00602567924166.rgb.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Billie Jean",
-                "Michael Jackson",
-                "4:35",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/3d/9d/38/3d9d3811-71f0-3a0e-1ada-3004e56ff852/827969428726.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Stayin' Alive",
-                "Bee Gees",
-                "4:10",
-                "https://is4-ssl.mzstatic.com/image/thumb/Music115/v4/1f/80/1f/1f801fc1-8c0f-ea3e-d3e5-387c6619619e/16UMGIM86640.rgb.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Whole Lotta Love",
-                "Led Zeppelin",
-                "5:33",
-                "https://is2-ssl.mzstatic.com/image/thumb/Music62/v4/7e/17/e3/7e17e33f-2efa-2a36-e916-7f808576cf6b/mzm.fyigqcbs.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Sweet Child O'Mine",
-                "Guns N' Roses",
-                "5:03",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/a0/4d/c4/a04dc484-03cc-02aa-fa82-5334fcb4bc16/18UMGIM24878.rgb.jpg/100x100bb.jpg"
-            )
-        )
+        inputEditText.requestFocus()
     }
 
     private fun showKeyboard() {
@@ -139,6 +201,9 @@ class SearchActivity : AppCompatActivity() {
     private fun restoreState(savedInstanceState: Bundle) {
         searchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY, "")
         inputEditText.setText(searchQuery)
+        if (searchQuery.isNotEmpty()) {
+            performSearch(searchQuery)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -153,7 +218,5 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
-        private val DEFAULT_TEXT_COLOR = R.color.grey
-        private val TYPED_TEXT_COLOR = R.color.black
     }
 }

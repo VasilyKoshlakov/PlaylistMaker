@@ -16,4 +16,7 @@
     <string name="user_agreement_url">https://yandex.ru/legal/praktikum_offer/</string>
     <string name="support_email">KoshlakovVV@yandex.ru</string>
     <string name="artwork">Album artwork</string>
+    <string name="nothing_found">Ничего не нашлось</string>
+    <string name="connection_error">Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="refresh">Обновить</string>
 </resources>

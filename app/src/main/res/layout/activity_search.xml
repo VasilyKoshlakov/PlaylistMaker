@@ -12,9 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp"
-        style="@style/LayoutOtherActivity">
+        style="@style/LayoutOtherActivity"
+        tools:ignore="ExtraText">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,7 +27,6 @@
                 android:layout_height="48dp"
                 android:src="@drawable/ic_back_24" />
 
-
             <TextView
                 style="@style/TextSettingsStyle"
                 android:layout_width="match_parent"
@@ -38,7 +36,6 @@
                 android:paddingStart="16dp"
                 android:text="@string/search"
                 android:textSize="22sp" />
-
         </LinearLayout>
 
         <FrameLayout
@@ -71,11 +68,12 @@
                 android:maxLength="5"
                 android:maxLines="1"
                 android:paddingStart="32dp"
-                android:imeOptions="actionSearch"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:clickable="true"
-                android:singleLine="true" />
+                android:imeOptions="actionDone"
+                android:singleLine="true"
+                tools:ignore="RtlSymmetry" />
 
             <ImageView
                 android:id="@+id/clearIcon"
@@ -89,14 +87,55 @@
                 android:visibility="gone" />
         </FrameLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/tracks_recycler_view"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="16dp"
-            android:clipToPadding="false"
-            android:paddingBottom="16dp"/>
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/tracks_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:paddingBottom="16dp"/>
+
+            <LinearLayout
+                android:id="@+id/placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/placeholderImage"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:src="@drawable/not_found_light_mode_120"/>
+
+                <TextView
+                    android:id="@+id/errorMessage"
+                    style="@style/TextSettingsStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textSize="19sp"
+                    android:fontFamily="@font/ys_display_medium"
+                    android:textAlignment="center"/>
+
+                <Button
+                    android:id="@+id/refreshButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/refresh"
+                    style="@style/ButtonRefresh"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="8dp"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </FrameLayout>
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
