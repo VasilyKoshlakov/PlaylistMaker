@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,7 +11,6 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
@@ -29,6 +27,12 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderImage: ImageView
     private lateinit var refreshButton: Button
     private lateinit var errorMessage: TextView
+    private lateinit var historyTitle: TextView
+    private lateinit var clearHistoryButton: Button
+    private lateinit var historyRecyclerView: RecyclerView
+    private lateinit var historyAdapter: TrackAdapter
+    private lateinit var historyContainer: View
+    private lateinit var searchHistory: SearchHistory
 
     private var searchQuery: String = ""
     private var lastSearchQuery: String = ""
@@ -38,7 +42,9 @@ class SearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_search)
 
         initViews()
+        setupSearchHistory()
         setupRecyclerView()
+        setupHistoryRecyclerView()
         setupBackButton()
         setupClearButton()
         setupSearchEditText()
@@ -57,13 +63,38 @@ class SearchActivity : AppCompatActivity() {
         placeholderImage = findViewById(R.id.placeholderImage)
         refreshButton = findViewById(R.id.refreshButton)
         errorMessage = findViewById(R.id.errorMessage)
+        historyTitle = findViewById(R.id.historySearch)
+        clearHistoryButton = findViewById(R.id.clearHistoryButton)
+        historyRecyclerView = findViewById(R.id.history_recycler_view)
+        historyContainer = findViewById(R.id.history_container)
+    }
+
+    private fun setupSearchHistory() {
+        searchHistory = SearchHistory(getSharedPreferences("app_prefs", MODE_PRIVATE))
+        clearHistoryButton.setOnClickListener {
+            searchHistory.clearHistory()
+            updateHistoryVisibility()
+        }
     }
 
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = TrackAdapter(emptyList()) { _ ->
+        adapter = TrackAdapter(emptyList()) { track ->
+            searchHistory.addTrack(track)
+            updateHistoryVisibility()
+            // TODO: Add navigation to player in next sprint
         }
         recyclerView.adapter = adapter
+    }
+
+    private fun setupHistoryRecyclerView() {
+        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+        historyAdapter = TrackAdapter(emptyList()) { track ->
+            searchHistory.addTrack(track)
+            updateHistoryVisibility()
+            // TODO: Add navigation to player in next sprint
+        }
+        historyRecyclerView.adapter = historyAdapter
     }
 
     private fun setupPlaceholder() {
@@ -75,21 +106,14 @@ class SearchActivity : AppCompatActivity() {
     private fun showPlaceholder(isError: Boolean = false) {
         recyclerView.visibility = View.GONE
         placeholder.visibility = View.VISIBLE
+        historyContainer.visibility = View.GONE
 
         if (isError) {
-            val connectionProblemIcon = when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                Configuration.UI_MODE_NIGHT_YES -> R.drawable.connection_problem_dark_mode_120
-                else -> R.drawable.connection_problem_light_mode_120
-            }
-            placeholderImage.setImageResource(connectionProblemIcon)
+            placeholderImage.setImageResource(R.drawable.connection_problem_placeholder_120)
             errorMessage.text = getString(R.string.connection_error)
             refreshButton.visibility = View.VISIBLE
         } else {
-            val notFoundIcon = when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                Configuration.UI_MODE_NIGHT_YES -> R.drawable.not_found_dark_mode_120
-                else -> R.drawable.not_found_light_mode_120
-            }
-            placeholderImage.setImageResource(notFoundIcon)
+            placeholderImage.setImageResource(R.drawable.not_found_placeholder_120)
             errorMessage.text = getString(R.string.nothing_found)
             refreshButton.visibility = View.GONE
         }
@@ -98,6 +122,27 @@ class SearchActivity : AppCompatActivity() {
     private fun hidePlaceholder() {
         placeholder.visibility = View.GONE
         recyclerView.visibility = View.VISIBLE
+        historyContainer.visibility = View.GONE
+    }
+
+    private fun showHistory() {
+        placeholder.visibility = View.GONE
+        recyclerView.visibility = View.GONE
+        historyContainer.visibility = View.VISIBLE
+        historyAdapter.updateTracks(searchHistory.getHistory())
+    }
+
+    private fun updateHistoryVisibility() {
+        val history = searchHistory.getHistory()
+        val shouldShowHistory = inputEditText.text.isEmpty() &&
+                inputEditText.hasFocus() &&
+                history.isNotEmpty()
+
+        if (shouldShowHistory) {
+            showHistory()
+        } else {
+            historyContainer.visibility = View.GONE
+        }
     }
 
     private fun performSearch(query: String) {
@@ -145,7 +190,7 @@ class SearchActivity : AppCompatActivity() {
             searchQuery = ""
             clearButton.visibility = View.GONE
             adapter.updateTracks(emptyList())
-            showPlaceholder()
+            updateHistoryVisibility()
         }
     }
 
@@ -157,12 +202,7 @@ class SearchActivity : AppCompatActivity() {
                 s?.let {
                     searchQuery = it.toString()
                     clearButton.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
-                    inputEditText.setTextColor(
-                        ContextCompat.getColor(
-                            this@SearchActivity,
-                            if (it.isEmpty()) R.color.grey else R.color.black
-                        )
-                    )
+                    updateHistoryVisibility()
                 }
             }
 
@@ -170,6 +210,7 @@ class SearchActivity : AppCompatActivity() {
         })
 
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
+            updateHistoryVisibility()
             if (hasFocus && inputEditText.text.isNotEmpty()) {
                 showKeyboard()
             }

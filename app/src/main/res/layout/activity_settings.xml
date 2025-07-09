@@ -58,11 +58,14 @@
                     android:text="@string/dark_mode"/>
 
 
-                <Switch
-                    style="@style/CustomSwitch"
-                    android:layout_width="55dp"
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/themeSwitcher"
+                    style="@style/CustomThemeSwitch"
+                    android:layout_width="60dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="end"
+
+
 
 
                     android:layoutDirection="rtl"
