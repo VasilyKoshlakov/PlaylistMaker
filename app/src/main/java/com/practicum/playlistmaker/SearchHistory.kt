@@ -7,7 +7,6 @@ import com.google.gson.reflect.TypeToken
 class SearchHistory(private val sharedPreferences: SharedPreferences) {
     private val gson = Gson()
     private val historyKey = "search_history"
-    private val maxHistorySize = 10
 
     fun addTrack(track: Track) {
         val history = getHistory().toMutableList()
@@ -16,8 +15,8 @@ class SearchHistory(private val sharedPreferences: SharedPreferences) {
 
         history.add(0, track)
 
-        if (history.size > maxHistorySize) {
-            history.removeAt(history.size - 1)
+        if (history.size > MAX_HISTORY_SIZE) {
+            history.removeAt(history.lastIndex)
         }
 
         saveHistory(history)
@@ -38,11 +37,15 @@ class SearchHistory(private val sharedPreferences: SharedPreferences) {
     }
 
     private fun saveHistory(history: List<Track>) {
-        if (history.isNullOrEmpty()) {
+        if (history.isEmpty()) {
             sharedPreferences.edit().remove(historyKey).apply()
         } else {
             val json = gson.toJson(history)
             sharedPreferences.edit().putString(historyKey, json).apply()
         }
+    }
+
+    companion object {
+        private const val MAX_HISTORY_SIZE = 10
     }
 }

@@ -64,11 +64,8 @@
                     android:layout_width="60dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="end"
-
-
-
-
-                    android:layoutDirection="rtl"
+                    android:paddingRight="16dp"
+                    android:src="@drawable/switch_off"
                     tools:ignore="UseSwitchCompatOrMaterialXml" />
 
             </FrameLayout>

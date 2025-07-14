@@ -42,11 +42,6 @@
         <item name="android:tint">@color/white</item>
     </style>
 
-    <style name="CustomSwitch" parent="Widget.AppCompat.CompoundButton.Switch">
-        <item name="android:thumbTint">@color/blue</item>
-        <item name="android:trackTint">@color/blue_light</item>
-    </style>
-
     <style name="ImageViewIconSearchStyle">
         <item name="android:layout_width">24dp</item>
         <item name="android:layout_height">24dp</item>
