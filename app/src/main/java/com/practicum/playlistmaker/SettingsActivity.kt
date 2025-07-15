@@ -7,8 +7,10 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -17,6 +19,12 @@ class SettingsActivity : AppCompatActivity() {
         val shareAppButton = findViewById<ImageView>(R.id.share_app_button)
         val writeToSupportButton = findViewById<ImageView>(R.id.write_to_support_button)
         val userAgreementButton = findViewById<ImageView>(R.id.user_agreement_button)
+        val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
+        themeSwitcher.isChecked = App.isDarkTheme()
+
+        themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
+            App.setDarkTheme(isChecked)
+        }
 
         settingsBackButton.setOnClickListener {
             finish()
