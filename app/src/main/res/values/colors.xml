@@ -11,4 +11,8 @@
     <color name="switch_thumb">#AEAFB4</color>
     <color name="switch_track">#E6E8EB</color>
     <color name="placeholder">#1A1B22</color>
+    <color name="play_button">#1A1B22</color>
+    <color name="add_button">#401A1B22</color>
+    <color name="like_button">#401A1B22</color>
+    <color name="text_song_value">#1A1B22</color>
 </resources>

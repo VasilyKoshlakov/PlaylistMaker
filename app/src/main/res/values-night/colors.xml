@@ -10,4 +10,8 @@
     <color name="switch_thumb">#3772E7</color>
     <color name="switch_track">#9FBBF3</color>
     <color name="placeholder">#FFFFFFFF</color>
+    <color name="play_button">#FFFFFFFF</color>
+    <color name="add_button">#40FFFFFF</color>
+    <color name="like_button">#40FFFFFF</color>
+    <color name="text_song_value">#FFFFFFFF</color>
 </resources>

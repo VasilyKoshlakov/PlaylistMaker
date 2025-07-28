@@ -15,6 +15,10 @@
         android:theme="@style/Base.Theme.PlaylistMaker"
         tools:ignore="ExtraText,MissingClass">
         <activity
+            android:name=".PlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PlaylistMaker.OtherActivity"/>
+        <activity
             android:name=".SearchActivity"
             android:exported="false"
             android:theme="@style/Theme.PlaylistMaker.OtherActivity"/>
