@@ -91,24 +91,22 @@ android:fillViewport="true">
         android:id="@+id/addButton"
         android:layout_width="51dp"
         android:layout_height="51dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginTop="52dp"
         android:contentDescription="TODO"
         android:src="@drawable/ic_add_button_51"
         android:background="@null"
         app:layout_constraintStart_toStartOf="@+id/left_guideline"
-        app:layout_constraintEnd_toStartOf="@+id/playButton"
         app:layout_constraintTop_toBottomOf="@+id/music_group"/>
 
     <ImageButton
         android:id="@+id/likeButton"
         android:layout_width="51dp"
         android:layout_height="51dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginTop="52dp"
         android:contentDescription="TODO"
         android:src="@drawable/ic_like_button_51"
         android:background="@null"
         app:layout_constraintEnd_toStartOf="@+id/right_guideline"
-        app:layout_constraintStart_toEndOf="@+id/playButton"
         app:layout_constraintTop_toBottomOf="@+id/music_group"/>
 
     <TextView

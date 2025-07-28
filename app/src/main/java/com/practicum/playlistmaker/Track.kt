@@ -1,7 +1,7 @@
 package com.practicum.playlistmaker
 
-import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -18,18 +18,6 @@ data class Track(
     val country: String?
 ) : Parcelable {
 
-    constructor(parcel: Parcel) : this(
-        parcel.readInt(),
-        parcel.readString().toString(),
-        parcel.readString().toString(),
-        parcel.readValue(Long::class.java.classLoader) as? Long,
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString()
-    )
-
     fun getCoverArtwork() = artworkUrl100?.replaceAfterLast('/', "512x512bb.jpg")
 
     fun getFormattedTrackTime(): String {
@@ -42,31 +30,5 @@ data class Track(
 
     fun getReleaseYear(): String? {
         return releaseDate?.take(4)
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(trackId)
-        parcel.writeString(trackName)
-        parcel.writeString(artistName)
-        parcel.writeValue(trackTimeMillis)
-        parcel.writeString(artworkUrl100)
-        parcel.writeString(collectionName)
-        parcel.writeString(releaseDate)
-        parcel.writeString(primaryGenreName)
-        parcel.writeString(country)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<Track> {
-        override fun createFromParcel(parcel: Parcel): Track {
-            return Track(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Track?> {
-            return arrayOfNulls(size)
-        }
     }
 }
