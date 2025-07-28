@@ -25,6 +25,7 @@
                 style="@style/ImageViewSettingsStyle"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:contentDescription="TODO"
                 android:src="@drawable/ic_back_24" />
 
             <TextView

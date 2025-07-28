@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -82,7 +83,11 @@ class SearchActivity : AppCompatActivity() {
         adapter = TrackAdapter(emptyList()) { track ->
             searchHistory.addTrack(track)
             updateHistoryVisibility()
-            // TODO: Add navigation to player in next sprint
+
+            val intent = Intent(this, PlayerActivity::class.java).apply {
+                putExtra(PlayerActivity.TRACK_KEY, track)
+            }
+            startActivity(intent)
         }
         recyclerView.adapter = adapter
     }
@@ -92,7 +97,11 @@ class SearchActivity : AppCompatActivity() {
         historyAdapter = TrackAdapter(emptyList()) { track ->
             searchHistory.addTrack(track)
             updateHistoryVisibility()
-            // TODO: Add navigation to player in next sprint
+
+            val intent = Intent(this, PlayerActivity::class.java).apply {
+                putExtra(PlayerActivity.TRACK_KEY, track)
+            }
+            startActivity(intent)
         }
         historyRecyclerView.adapter = historyAdapter
     }
