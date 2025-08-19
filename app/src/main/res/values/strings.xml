@@ -21,4 +21,6 @@
     <string name="refresh">Обновить</string>
     <string name="search_history">Вы искали</string>
     <string name="clear_history">Очистить историю</string>
+    <string name="unknown_genre">Неизвестный жанр</string>
+    <string name="unknown_country">Неизвестная страна</string>
 </resources>
