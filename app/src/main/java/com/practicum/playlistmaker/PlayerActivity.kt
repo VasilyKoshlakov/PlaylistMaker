@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker
 
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -12,10 +13,21 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerActivity : AppCompatActivity() {
+
+    companion object {
+        private const val STATE_DEFAULT = 0
+        private const val STATE_PREPARED = 1
+        private const val STATE_PLAYING = 2
+        private const val STATE_PAUSED = 3
+        const val TRACK_KEY = "track"
+    }
+
+    private var playerState = STATE_DEFAULT
+    private lateinit var mediaPlayer: MediaPlayer
+    private var playbackPosition = 0
 
     private lateinit var backButton: ImageButton
     private lateinit var artworkImageView: ImageView
@@ -30,8 +42,11 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var genreValueTextView: TextView
     private lateinit var countryValueTextView: TextView
     private lateinit var playButton: ImageButton
+    private lateinit var pauseButton: ImageButton
     private lateinit var addButton: ImageButton
     private lateinit var likeButton: ImageButton
+
+    private var currentTrack: Track? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +54,7 @@ class PlayerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_player)
 
         initViews()
+        initMediaPlayer()
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -53,10 +69,20 @@ class PlayerActivity : AppCompatActivity() {
             intent.getParcelableExtra(TRACK_KEY)
         }
 
+        currentTrack = track
         track?.let { setupPlayer(it) }
 
         backButton.setOnClickListener {
+            releasePlayer()
             finish()
+        }
+
+        playButton.setOnClickListener {
+            playbackControl()
+        }
+
+        pauseButton.setOnClickListener {
+            playbackControl()
         }
     }
 
@@ -74,17 +100,29 @@ class PlayerActivity : AppCompatActivity() {
         genreValueTextView = findViewById(R.id.genreValue)
         countryValueTextView = findViewById(R.id.countryValue)
         playButton = findViewById(R.id.playButton)
+        pauseButton = findViewById(R.id.pauseButton)
         addButton = findViewById(R.id.addButton)
         likeButton = findViewById(R.id.likeButton)
     }
 
-    private fun formatTime(millis: Long): String {
-        return SimpleDateFormat("m:ss", Locale.getDefault()).format(millis)
+    private fun initMediaPlayer() {
+        mediaPlayer = MediaPlayer()
+        mediaPlayer.setOnPreparedListener {
+            playButton.isEnabled = true
+            pauseButton.isEnabled = true
+            playerState = STATE_PREPARED
+            updateButtonVisibility()
+        }
+        mediaPlayer.setOnCompletionListener {
+            playbackPosition = 0
+            playerState = STATE_PREPARED
+            updateButtonVisibility()
+            currentTimeTextView.text = formatTime(0)
+        }
     }
 
     private fun setupPlayer(track: Track) {
         val artworkUrl = track.getCoverArtwork()
-
         if (artworkUrl != null) {
             Glide.with(this)
                 .load(artworkUrl)
@@ -122,8 +160,7 @@ class PlayerActivity : AppCompatActivity() {
         genreValueTextView.text = track.primaryGenreName ?: getString(R.string.unknown_genre)
         countryValueTextView.text = track.country ?: getString(R.string.unknown_country)
 
-        playButton.setOnClickListener {
-        }
+        preparePlayer(track.previewUrl)
 
         addButton.setOnClickListener {
         }
@@ -132,7 +169,101 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        const val TRACK_KEY = "track"
+    private fun preparePlayer(previewUrl: String?) {
+        if (previewUrl.isNullOrEmpty()) {
+            playButton.isEnabled = false
+            pauseButton.isEnabled = false
+            return
+        }
+
+        try {
+            mediaPlayer.reset()
+            mediaPlayer.setDataSource(previewUrl)
+            mediaPlayer.prepareAsync()
+            playerState = STATE_DEFAULT
+            updateButtonVisibility()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            playButton.isEnabled = false
+            pauseButton.isEnabled = false
+        }
+    }
+
+    private fun playbackControl() {
+        when(playerState) {
+            STATE_PLAYING -> {
+                pausePlayer()
+            }
+            STATE_PREPARED, STATE_PAUSED -> {
+                startPlayer()
+            }
+        }
+    }
+
+    private fun startPlayer() {
+        mediaPlayer.seekTo(playbackPosition)
+        mediaPlayer.start()
+        playerState = STATE_PLAYING
+        updateButtonVisibility()
+        startProgressUpdate()
+    }
+
+    private fun pausePlayer() {
+        playbackPosition = mediaPlayer.currentPosition
+        mediaPlayer.pause()
+        playerState = STATE_PAUSED
+        updateButtonVisibility()
+    }
+
+    private fun releasePlayer() {
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.stop()
+        }
+        mediaPlayer.reset()
+        playbackPosition = 0
+        playerState = STATE_DEFAULT
+        updateButtonVisibility()
+    }
+
+    private fun updateButtonVisibility() {
+        when (playerState) {
+            STATE_PLAYING -> {
+                playButton.visibility = View.INVISIBLE
+                pauseButton.visibility = View.VISIBLE
+            }
+            STATE_PREPARED, STATE_PAUSED, STATE_DEFAULT -> {
+                playButton.visibility = View.VISIBLE
+                pauseButton.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun startProgressUpdate() {
+        Thread {
+            while (playerState == STATE_PLAYING && mediaPlayer.isPlaying) {
+                runOnUiThread {
+                    currentTimeTextView.text = formatTime(mediaPlayer.currentPosition.toLong())
+                }
+                Thread.sleep(1000)
+            }
+        }.start()
+    }
+
+    private fun formatTime(millis: Long): String {
+        val seconds = (millis / 1000) % 60
+        val minutes = (millis / (1000 * 60)) % 60
+        return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (playerState == STATE_PLAYING) {
+            pausePlayer()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer.release()
     }
 }

@@ -2,6 +2,8 @@ package com.practicum.playlistmaker
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -10,6 +12,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,9 +37,15 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var historyAdapter: TrackAdapter
     private lateinit var historyContainer: View
     private lateinit var searchHistory: SearchHistory
+    private lateinit var progressBar: ProgressBar
 
     private var searchQuery: String = ""
     private var lastSearchQuery: String = ""
+
+    private val handler = Handler(Looper.getMainLooper())
+    private var searchRunnable: Runnable? = null
+    private val DEBOUNCE_DELAY = 2000L
+    private var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +77,7 @@ class SearchActivity : AppCompatActivity() {
         clearHistoryButton = findViewById(R.id.clearHistoryButton)
         historyRecyclerView = findViewById(R.id.history_recycler_view)
         historyContainer = findViewById(R.id.history_container)
+        progressBar = findViewById(R.id.progressBar)
     }
 
     private fun setupSearchHistory() {
@@ -80,7 +90,8 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = TrackAdapter(emptyList()) { track ->
+
+        val debouncedTrackClick = debounceClick<Track> { track ->
             searchHistory.addTrack(track)
             updateHistoryVisibility()
 
@@ -89,12 +100,14 @@ class SearchActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+
+        adapter = TrackAdapter(emptyList(), debouncedTrackClick)
         recyclerView.adapter = adapter
     }
 
     private fun setupHistoryRecyclerView() {
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
-        historyAdapter = TrackAdapter(emptyList()) { track ->
+        val debouncedHistoryClick = debounceClick<Track> { track ->
             searchHistory.addTrack(track)
             updateHistoryVisibility()
 
@@ -103,6 +116,8 @@ class SearchActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+
+        historyAdapter = TrackAdapter(emptyList(), debouncedHistoryClick)
         historyRecyclerView.adapter = historyAdapter
     }
 
@@ -116,6 +131,8 @@ class SearchActivity : AppCompatActivity() {
         recyclerView.visibility = View.GONE
         placeholder.visibility = View.VISIBLE
         historyContainer.visibility = View.GONE
+        progressBar.visibility = View.GONE
+        isLoading = false
 
         if (isError) {
             placeholderImage.setImageResource(R.drawable.connection_problem_placeholder_120)
@@ -132,12 +149,16 @@ class SearchActivity : AppCompatActivity() {
         placeholder.visibility = View.GONE
         recyclerView.visibility = View.VISIBLE
         historyContainer.visibility = View.GONE
+        progressBar.visibility = View.GONE
+        isLoading = false
     }
 
     private fun showHistory() {
         placeholder.visibility = View.GONE
         recyclerView.visibility = View.GONE
         historyContainer.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
+        isLoading = false
         historyAdapter.updateTracks(searchHistory.getHistory())
     }
 
@@ -162,10 +183,14 @@ class SearchActivity : AppCompatActivity() {
         }
 
         lastSearchQuery = query
-        hidePlaceholder()
+
+        showLoading()
 
         RetrofitClient.itunesApiService.search(query).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+
+                hideLoading()
+
                 if (response.isSuccessful) {
                     response.body()?.let { apiResponse ->
                         if (apiResponse.results.isEmpty()) {
@@ -181,9 +206,23 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                hideLoading()
                 showPlaceholder(true)
             }
         })
+    }
+
+    private fun showLoading() {
+        isLoading = true
+        recyclerView.visibility = View.GONE
+        placeholder.visibility = View.GONE
+        historyContainer.visibility = View.GONE
+        progressBar.visibility = View.VISIBLE
+    }
+
+    private fun hideLoading() {
+        isLoading = false
+        progressBar.visibility = View.GONE
     }
 
     private fun setupBackButton() {
@@ -200,6 +239,7 @@ class SearchActivity : AppCompatActivity() {
             clearButton.visibility = View.GONE
             adapter.updateTracks(emptyList())
             updateHistoryVisibility()
+            searchRunnable?.let { runnable -> handler.removeCallbacks(runnable) }
         }
     }
 
@@ -208,10 +248,17 @@ class SearchActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let {
-                    searchQuery = it.toString()
-                    clearButton.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
+                s?.let { sequence ->
+                    searchQuery = sequence.toString()
+                    clearButton.visibility = if (sequence.isEmpty()) View.GONE else View.VISIBLE
                     updateHistoryVisibility()
+                    searchRunnable?.let { runnable -> handler.removeCallbacks(runnable) }
+                    searchRunnable = Runnable {
+                        if (searchQuery.isNotEmpty() && !isLoading) {
+                            performSearch(searchQuery)
+                        }
+                    }
+                    handler.postDelayed(searchRunnable!!, DEBOUNCE_DELAY)
                 }
             }
 
@@ -227,6 +274,7 @@ class SearchActivity : AppCompatActivity() {
 
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                searchRunnable?.let { runnable -> handler.removeCallbacks(runnable) }
                 performSearch(searchQuery)
                 hideKeyboard()
                 true
@@ -236,6 +284,21 @@ class SearchActivity : AppCompatActivity() {
         }
 
         inputEditText.requestFocus()
+    }
+
+    private inline fun <T> debounceClick(
+        crossinline onClick: (T) -> Unit
+    ): (T) -> Unit {
+        var lastClickTime = 0L
+        val DEBOUNCE_CLICK_DELAY = 1000L
+
+        return { item ->
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastClickTime > DEBOUNCE_CLICK_DELAY) {
+                lastClickTime = currentTime
+                onClick(item)
+            }
+        }
     }
 
     private fun showKeyboard() {
@@ -264,6 +327,11 @@ class SearchActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         restoreState(savedInstanceState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
     }
 
     companion object {
