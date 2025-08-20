@@ -88,6 +88,19 @@ android:fillViewport="true">
         app:layout_constraintTop_toBottomOf="@+id/music_group"/>
 
     <ImageButton
+        android:id="@+id/pauseButton"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="30dp"
+        android:contentDescription="TODO"
+        android:src="@drawable/ic_pause_button_100"
+        android:background="@null"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/left_guideline"
+        app:layout_constraintEnd_toStartOf="@+id/right_guideline"
+        app:layout_constraintTop_toBottomOf="@+id/music_group"/>
+
+    <ImageButton
         android:id="@+id/addButton"
         android:layout_width="51dp"
         android:layout_height="51dp"
