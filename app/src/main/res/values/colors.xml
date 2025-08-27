@@ -15,4 +15,5 @@
     <color name="add_button">#401A1B22</color>
     <color name="like_button">#401A1B22</color>
     <color name="text_song_value">#1A1B22</color>
+    <color name="progressbar">#3772E7</color>
 </resources>
