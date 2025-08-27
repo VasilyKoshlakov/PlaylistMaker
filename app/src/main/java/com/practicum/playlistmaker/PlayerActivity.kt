@@ -3,6 +3,8 @@ package com.practicum.playlistmaker
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -17,17 +19,11 @@ import java.util.Locale
 
 class PlayerActivity : AppCompatActivity() {
 
-    companion object {
-        private const val STATE_DEFAULT = 0
-        private const val STATE_PREPARED = 1
-        private const val STATE_PLAYING = 2
-        private const val STATE_PAUSED = 3
-        const val TRACK_KEY = "track"
-    }
-
     private var playerState = STATE_DEFAULT
     private lateinit var mediaPlayer: MediaPlayer
     private var playbackPosition = 0
+    private lateinit var handler: Handler
+    private lateinit var progressUpdateRunnable: Runnable
 
     private lateinit var backButton: ImageButton
     private lateinit var artworkImageView: ImageView
@@ -42,7 +38,6 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var genreValueTextView: TextView
     private lateinit var countryValueTextView: TextView
     private lateinit var playButton: ImageButton
-    private lateinit var pauseButton: ImageButton
     private lateinit var addButton: ImageButton
     private lateinit var likeButton: ImageButton
 
@@ -55,6 +50,7 @@ class PlayerActivity : AppCompatActivity() {
 
         initViews()
         initMediaPlayer()
+        initHandler()
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -81,8 +77,10 @@ class PlayerActivity : AppCompatActivity() {
             playbackControl()
         }
 
-        pauseButton.setOnClickListener {
-            playbackControl()
+        addButton.setOnClickListener {
+        }
+
+        likeButton.setOnClickListener {
         }
     }
 
@@ -100,7 +98,6 @@ class PlayerActivity : AppCompatActivity() {
         genreValueTextView = findViewById(R.id.genreValue)
         countryValueTextView = findViewById(R.id.countryValue)
         playButton = findViewById(R.id.playButton)
-        pauseButton = findViewById(R.id.pauseButton)
         addButton = findViewById(R.id.addButton)
         likeButton = findViewById(R.id.likeButton)
     }
@@ -109,15 +106,27 @@ class PlayerActivity : AppCompatActivity() {
         mediaPlayer = MediaPlayer()
         mediaPlayer.setOnPreparedListener {
             playButton.isEnabled = true
-            pauseButton.isEnabled = true
             playerState = STATE_PREPARED
-            updateButtonVisibility()
+            updatePlayButtonIcon()
         }
         mediaPlayer.setOnCompletionListener {
             playbackPosition = 0
             playerState = STATE_PREPARED
-            updateButtonVisibility()
+            updatePlayButtonIcon()
             currentTimeTextView.text = formatTime(0)
+            handler.removeCallbacks(progressUpdateRunnable)
+        }
+    }
+
+    private fun initHandler() {
+        handler = Handler(Looper.getMainLooper())
+        progressUpdateRunnable = object : Runnable {
+            override fun run() {
+                if (playerState == STATE_PLAYING && mediaPlayer.isPlaying) {
+                    currentTimeTextView.text = formatTime(mediaPlayer.currentPosition.toLong())
+                    handler.postDelayed(this, PROGRESS_UPDATE_DELAY)
+                }
+            }
         }
     }
 
@@ -161,18 +170,11 @@ class PlayerActivity : AppCompatActivity() {
         countryValueTextView.text = track.country ?: getString(R.string.unknown_country)
 
         preparePlayer(track.previewUrl)
-
-        addButton.setOnClickListener {
-        }
-
-        likeButton.setOnClickListener {
-        }
     }
 
     private fun preparePlayer(previewUrl: String?) {
         if (previewUrl.isNullOrEmpty()) {
             playButton.isEnabled = false
-            pauseButton.isEnabled = false
             return
         }
 
@@ -181,11 +183,10 @@ class PlayerActivity : AppCompatActivity() {
             mediaPlayer.setDataSource(previewUrl)
             mediaPlayer.prepareAsync()
             playerState = STATE_DEFAULT
-            updateButtonVisibility()
+            updatePlayButtonIcon()
         } catch (e: Exception) {
             e.printStackTrace()
             playButton.isEnabled = false
-            pauseButton.isEnabled = false
         }
     }
 
@@ -204,7 +205,7 @@ class PlayerActivity : AppCompatActivity() {
         mediaPlayer.seekTo(playbackPosition)
         mediaPlayer.start()
         playerState = STATE_PLAYING
-        updateButtonVisibility()
+        updatePlayButtonIcon()
         startProgressUpdate()
     }
 
@@ -212,7 +213,8 @@ class PlayerActivity : AppCompatActivity() {
         playbackPosition = mediaPlayer.currentPosition
         mediaPlayer.pause()
         playerState = STATE_PAUSED
-        updateButtonVisibility()
+        updatePlayButtonIcon()
+        handler.removeCallbacks(progressUpdateRunnable)
     }
 
     private fun releasePlayer() {
@@ -222,31 +224,20 @@ class PlayerActivity : AppCompatActivity() {
         mediaPlayer.reset()
         playbackPosition = 0
         playerState = STATE_DEFAULT
-        updateButtonVisibility()
+        updatePlayButtonIcon()
+        handler.removeCallbacks(progressUpdateRunnable)
     }
 
-    private fun updateButtonVisibility() {
-        when (playerState) {
-            STATE_PLAYING -> {
-                playButton.visibility = View.INVISIBLE
-                pauseButton.visibility = View.VISIBLE
-            }
-            STATE_PREPARED, STATE_PAUSED, STATE_DEFAULT -> {
-                playButton.visibility = View.VISIBLE
-                pauseButton.visibility = View.GONE
-            }
+    private fun updatePlayButtonIcon() {
+        val iconRes = when (playerState) {
+            STATE_PLAYING -> R.drawable.ic_pause_button_100
+            else -> R.drawable.ic_play_button_100
         }
+        playButton.setImageResource(iconRes)
     }
 
     private fun startProgressUpdate() {
-        Thread {
-            while (playerState == STATE_PLAYING && mediaPlayer.isPlaying) {
-                runOnUiThread {
-                    currentTimeTextView.text = formatTime(mediaPlayer.currentPosition.toLong())
-                }
-                Thread.sleep(1000)
-            }
-        }.start()
+        handler.post(progressUpdateRunnable)
     }
 
     private fun formatTime(millis: Long): String {
@@ -264,6 +255,18 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacks(progressUpdateRunnable)
         mediaPlayer.release()
     }
+
+    companion object {
+        private const val STATE_DEFAULT = 0
+        private const val STATE_PREPARED = 1
+        private const val STATE_PLAYING = 2
+        private const val STATE_PAUSED = 3
+        const val TRACK_KEY = "track"
+        private const val PROGRESS_UPDATE_DELAY = 500L
+    }
 }
+
+
