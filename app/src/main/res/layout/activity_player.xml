@@ -10,7 +10,7 @@ android:fillViewport="true">
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".PlayerActivity">
+    tools:context=".presentation.player.PlayerActivity">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/left_guideline"

@@ -29,5 +29,7 @@ class App : Application() {
         super.onCreate()
         sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         setDarkTheme(isDarkTheme())
+
+        AppCreator.init(this)
     }
 }
