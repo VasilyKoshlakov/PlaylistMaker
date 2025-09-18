@@ -1,6 +1,5 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation.player
 
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -15,16 +14,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import java.util.Locale
+import com.practicum.playlistmaker.AppCreator
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.domain.api.PlayerInteractor
+import com.practicum.playlistmaker.domain.model.Track
 
 class PlayerActivity : AppCompatActivity() {
 
-    private var playerState = STATE_DEFAULT
-    private lateinit var mediaPlayer: MediaPlayer
-    private var playbackPosition = 0
-    private lateinit var handler: Handler
-    private lateinit var progressUpdateRunnable: Runnable
-
+    private lateinit var playerInteractor: PlayerInteractor
     private lateinit var backButton: ImageButton
     private lateinit var artworkImageView: ImageView
     private lateinit var songTextView: TextView
@@ -42,15 +39,22 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var likeButton: ImageButton
 
     private var currentTrack: Track? = null
+    private var isPlaying = false
+
+    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var progressUpdateRunnable: Runnable
+    private val progressUpdateDelay = 500L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_player)
 
+        playerInteractor = AppCreator.providePlayerInteractor()
+
         initViews()
-        initMediaPlayer()
         initHandler()
+        setupPlayer()
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -66,7 +70,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         currentTrack = track
-        track?.let { setupPlayer(it) }
+        track?.let { setupPlayerUI(it) }
 
         backButton.setOnClickListener {
             releasePlayer()
@@ -102,35 +106,31 @@ class PlayerActivity : AppCompatActivity() {
         likeButton = findViewById(R.id.likeButton)
     }
 
-    private fun initMediaPlayer() {
-        mediaPlayer = MediaPlayer()
-        mediaPlayer.setOnPreparedListener {
-            playButton.isEnabled = true
-            playerState = STATE_PREPARED
-            updatePlayButtonIcon()
-        }
-        mediaPlayer.setOnCompletionListener {
-            playbackPosition = 0
-            playerState = STATE_PREPARED
-            updatePlayButtonIcon()
-            currentTimeTextView.text = formatTime(0)
-            handler.removeCallbacks(progressUpdateRunnable)
-        }
-    }
-
     private fun initHandler() {
-        handler = Handler(Looper.getMainLooper())
         progressUpdateRunnable = object : Runnable {
             override fun run() {
-                if (playerState == STATE_PLAYING && mediaPlayer.isPlaying) {
-                    currentTimeTextView.text = formatTime(mediaPlayer.currentPosition.toLong())
-                    handler.postDelayed(this, PROGRESS_UPDATE_DELAY)
+                if (isPlaying) {
+                    currentTimeTextView.text = playerInteractor.getFormattedTime(
+                        playerInteractor.getCurrentPosition().toLong()
+                    )
+                    handler.postDelayed(this, progressUpdateDelay)
                 }
             }
         }
     }
 
-    private fun setupPlayer(track: Track) {
+    private fun setupPlayer() {
+        playerInteractor.setOnCompletionListener {
+            runOnUiThread {
+                isPlaying = false
+                updatePlayButtonIcon()
+                currentTimeTextView.text = playerInteractor.getFormattedTime(0)
+                handler.removeCallbacks(progressUpdateRunnable)
+            }
+        }
+    }
+
+    private fun setupPlayerUI(track: Track) {
         val artworkUrl = track.getCoverArtwork()
         if (artworkUrl != null) {
             Glide.with(this)
@@ -146,7 +146,7 @@ class PlayerActivity : AppCompatActivity() {
         songTextView.text = track.trackName
         artistTextView.text = track.artistName
         durationTextView.text = track.getFormattedTrackTime()
-        currentTimeTextView.text = formatTime(0)
+        currentTimeTextView.text = playerInteractor.getFormattedTime(0)
 
         track.collectionName?.let {
             collectionNameValueTextView.text = it
@@ -173,65 +173,47 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun preparePlayer(previewUrl: String?) {
-        if (previewUrl.isNullOrEmpty()) {
-            playButton.isEnabled = false
-            return
-        }
-
-        try {
-            mediaPlayer.reset()
-            mediaPlayer.setDataSource(previewUrl)
-            mediaPlayer.prepareAsync()
-            playerState = STATE_DEFAULT
-            updatePlayButtonIcon()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            playButton.isEnabled = false
+        playerInteractor.preparePlayer(previewUrl) { isPrepared ->
+            runOnUiThread {
+                playButton.isEnabled = isPrepared
+            }
         }
     }
 
     private fun playbackControl() {
-        when(playerState) {
-            STATE_PLAYING -> {
-                pausePlayer()
-            }
-            STATE_PREPARED, STATE_PAUSED -> {
-                startPlayer()
-            }
+        if (isPlaying) {
+            pausePlayer()
+        } else {
+            startPlayer()
         }
     }
 
     private fun startPlayer() {
-        mediaPlayer.seekTo(playbackPosition)
-        mediaPlayer.start()
-        playerState = STATE_PLAYING
+        playerInteractor.startPlayer()
+        isPlaying = true
         updatePlayButtonIcon()
         startProgressUpdate()
     }
 
     private fun pausePlayer() {
-        playbackPosition = mediaPlayer.currentPosition
-        mediaPlayer.pause()
-        playerState = STATE_PAUSED
+        playerInteractor.pausePlayer()
+        isPlaying = false
         updatePlayButtonIcon()
         handler.removeCallbacks(progressUpdateRunnable)
     }
 
     private fun releasePlayer() {
-        if (mediaPlayer.isPlaying) {
-            mediaPlayer.stop()
-        }
-        mediaPlayer.reset()
-        playbackPosition = 0
-        playerState = STATE_DEFAULT
+        playerInteractor.releasePlayer()
+        isPlaying = false
         updatePlayButtonIcon()
         handler.removeCallbacks(progressUpdateRunnable)
     }
 
     private fun updatePlayButtonIcon() {
-        val iconRes = when (playerState) {
-            STATE_PLAYING -> R.drawable.ic_pause_button_100
-            else -> R.drawable.ic_play_button_100
+        val iconRes = if (isPlaying) {
+            R.drawable.ic_pause_button_100
+        } else {
+            R.drawable.ic_play_button_100
         }
         playButton.setImageResource(iconRes)
     }
@@ -240,15 +222,9 @@ class PlayerActivity : AppCompatActivity() {
         handler.post(progressUpdateRunnable)
     }
 
-    private fun formatTime(millis: Long): String {
-        val seconds = (millis / 1000) % 60
-        val minutes = (millis / (1000 * 60)) % 60
-        return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
-    }
-
     override fun onPause() {
         super.onPause()
-        if (playerState == STATE_PLAYING) {
+        if (isPlaying) {
             pausePlayer()
         }
     }
@@ -256,16 +232,11 @@ class PlayerActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(progressUpdateRunnable)
-        mediaPlayer.release()
+        playerInteractor.releasePlayer()
     }
 
     companion object {
-        private const val STATE_DEFAULT = 0
-        private const val STATE_PREPARED = 1
-        private const val STATE_PLAYING = 2
-        private const val STATE_PAUSED = 3
         const val TRACK_KEY = "track"
-        private const val PROGRESS_UPDATE_DELAY = 500L
     }
 }
 

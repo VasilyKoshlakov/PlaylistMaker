@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation.search
 
 import android.content.Intent
 import android.os.Bundle
@@ -17,12 +17,17 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.practicum.playlistmaker.AppCreator
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.domain.api.SearchInteractor
+import com.practicum.playlistmaker.domain.model.Track
+import com.practicum.playlistmaker.presentation.adapter.TrackAdapter
+import com.practicum.playlistmaker.presentation.player.PlayerActivity
+
 
 class SearchActivity : AppCompatActivity() {
 
+    private lateinit var searchInteractor: SearchInteractor
     private lateinit var inputEditText: EditText
     private lateinit var clearButton: ImageView
     private lateinit var recyclerView: RecyclerView
@@ -36,7 +41,6 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var historyRecyclerView: RecyclerView
     private lateinit var historyAdapter: TrackAdapter
     private lateinit var historyContainer: View
-    private lateinit var searchHistory: SearchHistory
     private lateinit var progressBar: ProgressBar
 
     private var searchQuery: String = ""
@@ -44,15 +48,17 @@ class SearchActivity : AppCompatActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var searchRunnable: Runnable? = null
-    private val DEBOUNCE_DELAY = 2000L
+    private val debounceDelay = 2000L
     private var isLoading = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
+        searchInteractor = AppCreator.provideSearchInteractor()
+
         initViews()
-        setupSearchHistory()
         setupRecyclerView()
         setupHistoryRecyclerView()
         setupBackButton()
@@ -80,19 +86,11 @@ class SearchActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
     }
 
-    private fun setupSearchHistory() {
-        searchHistory = SearchHistory(getSharedPreferences("app_prefs", MODE_PRIVATE))
-        clearHistoryButton.setOnClickListener {
-            searchHistory.clearHistory()
-            updateHistoryVisibility()
-        }
-    }
-
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val debouncedTrackClick = debounceClick<Track> { track ->
-            searchHistory.addTrack(track)
+            searchInteractor.addTrackToHistory(track)
             updateHistoryVisibility()
 
             val intent = Intent(this, PlayerActivity::class.java).apply {
@@ -108,7 +106,7 @@ class SearchActivity : AppCompatActivity() {
     private fun setupHistoryRecyclerView() {
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
         val debouncedHistoryClick = debounceClick<Track> { track ->
-            searchHistory.addTrack(track)
+            searchInteractor.addTrackToHistory(track)
             updateHistoryVisibility()
 
             val intent = Intent(this, PlayerActivity::class.java).apply {
@@ -124,6 +122,11 @@ class SearchActivity : AppCompatActivity() {
     private fun setupPlaceholder() {
         refreshButton.setOnClickListener {
             performSearch(lastSearchQuery)
+        }
+
+        clearHistoryButton.setOnClickListener {
+            searchInteractor.clearSearchHistory()
+            updateHistoryVisibility()
         }
     }
 
@@ -159,11 +162,11 @@ class SearchActivity : AppCompatActivity() {
         historyContainer.visibility = View.VISIBLE
         progressBar.visibility = View.GONE
         isLoading = false
-        historyAdapter.updateTracks(searchHistory.getHistory())
+        historyAdapter.updateTracks(searchInteractor.getSearchHistory())
     }
 
     private fun updateHistoryVisibility() {
-        val history = searchHistory.getHistory()
+        val history = searchInteractor.getSearchHistory()
         val shouldShowHistory = inputEditText.text.isEmpty() &&
                 inputEditText.hasFocus() &&
                 history.isNotEmpty()
@@ -183,33 +186,19 @@ class SearchActivity : AppCompatActivity() {
         }
 
         lastSearchQuery = query
-
         showLoading()
 
-        RetrofitClient.itunesApiService.search(query).enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-
+        searchInteractor.searchTracks(query) { tracks ->
+            runOnUiThread {
                 hideLoading()
-
-                if (response.isSuccessful) {
-                    response.body()?.let { apiResponse ->
-                        if (apiResponse.results.isEmpty()) {
-                            showPlaceholder()
-                        } else {
-                            adapter.updateTracks(apiResponse.results)
-                            hidePlaceholder()
-                        }
-                    } ?: showPlaceholder(true)
+                if (tracks.isEmpty()) {
+                    showPlaceholder()
                 } else {
-                    showPlaceholder(true)
+                    adapter.updateTracks(tracks)
+                    hidePlaceholder()
                 }
             }
-
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                hideLoading()
-                showPlaceholder(true)
-            }
-        })
+        }
     }
 
     private fun showLoading() {
@@ -258,7 +247,7 @@ class SearchActivity : AppCompatActivity() {
                             performSearch(searchQuery)
                         }
                     }
-                    handler.postDelayed(searchRunnable!!, DEBOUNCE_DELAY)
+                    handler.postDelayed(searchRunnable!!, debounceDelay)
                 }
             }
 
@@ -290,7 +279,6 @@ class SearchActivity : AppCompatActivity() {
         crossinline onClick: (T) -> Unit
     ): (T) -> Unit {
         var lastClickTime = 0L
-        val DEBOUNCE_CLICK_DELAY = 1000L
 
         return { item ->
             val currentTime = System.currentTimeMillis()
@@ -336,5 +324,6 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
+        private const val DEBOUNCE_CLICK_DELAY = 1000L
     }
 }

@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchActivity">
+    tools:context=".presentation.search.SearchActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,7 +48,7 @@
             android:layout_marginStart="16dp"
             android:background="@drawable/edit_text"
             android:orientation="horizontal"
-            tools:context=".MainActivity">
+            tools:context=".presentation.main.MainActivity">
 
             <ImageView
                 android:layout_width="24dp"
