@@ -6,8 +6,8 @@ import com.practicum.playlistmaker.domain.api.TrackRepository
 
 class SearchInteractorImpl(private val repository: TrackRepository) : SearchInteractor {
 
-    override suspend fun searchTracks(query: String): List<Track> {
-        return repository.searchTracks(query)
+    override fun searchTracks(query: String, callback: (List<Track>) -> Unit) {
+        repository.searchTracks(query, callback)
     }
 
     override fun getSearchHistory(): List<Track> {

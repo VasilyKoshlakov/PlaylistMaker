@@ -23,10 +23,7 @@ import com.practicum.playlistmaker.domain.api.SearchInteractor
 import com.practicum.playlistmaker.domain.model.Track
 import com.practicum.playlistmaker.presentation.adapter.TrackAdapter
 import com.practicum.playlistmaker.presentation.player.PlayerActivity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+
 
 class SearchActivity : AppCompatActivity() {
 
@@ -53,6 +50,7 @@ class SearchActivity : AppCompatActivity() {
     private var searchRunnable: Runnable? = null
     private val debounceDelay = 2000L
     private var isLoading = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -190,18 +188,15 @@ class SearchActivity : AppCompatActivity() {
         lastSearchQuery = query
         showLoading()
 
-        CoroutineScope(Dispatchers.Main).launch {
-            val tracks = withContext(Dispatchers.IO) {
-                searchInteractor.searchTracks(query)
-            }
-
-            hideLoading()
-
-            if (tracks.isEmpty()) {
-                showPlaceholder()
-            } else {
-                adapter.updateTracks(tracks)
-                hidePlaceholder()
+        searchInteractor.searchTracks(query) { tracks ->
+            runOnUiThread {
+                hideLoading()
+                if (tracks.isEmpty()) {
+                    showPlaceholder()
+                } else {
+                    adapter.updateTracks(tracks)
+                    hidePlaceholder()
+                }
             }
         }
     }
@@ -284,11 +279,10 @@ class SearchActivity : AppCompatActivity() {
         crossinline onClick: (T) -> Unit
     ): (T) -> Unit {
         var lastClickTime = 0L
-        val debounceClickDelay = 1000L
 
         return { item ->
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastClickTime > debounceClickDelay) {
+            if (currentTime - lastClickTime > DEBOUNCE_CLICK_DELAY) {
                 lastClickTime = currentTime
                 onClick(item)
             }
@@ -330,5 +324,6 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
+        private const val DEBOUNCE_CLICK_DELAY = 1000L
     }
 }

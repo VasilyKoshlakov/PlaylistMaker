@@ -8,24 +8,29 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.practicum.playlistmaker.App
+import com.practicum.playlistmaker.AppCreator
 import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.domain.api.SettingsInteractor
 
 class SettingsActivity : AppCompatActivity() {
+
+    private lateinit var settingsInteractor: SettingsInteractor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        settingsInteractor = AppCreator.provideSettingsInteractor()
 
         val settingsBackButton = findViewById<ImageView>(R.id.button_back_settings)
         val shareAppButton = findViewById<ImageView>(R.id.share_app_button)
         val writeToSupportButton = findViewById<ImageView>(R.id.write_to_support_button)
         val userAgreementButton = findViewById<ImageView>(R.id.user_agreement_button)
         val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
-        themeSwitcher.isChecked = App.isDarkTheme()
+        themeSwitcher.isChecked = settingsInteractor.isDarkTheme()
 
         themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
-            App.setDarkTheme(isChecked)
+            settingsInteractor.setDarkTheme(isChecked)
         }
 
         settingsBackButton.setOnClickListener {
@@ -47,7 +52,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun shareApp() {
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message))
+            putExtra(Intent.EXTRA_TEXT, settingsInteractor.getShareMessage())
         }
         startActivity(Intent.createChooser(shareIntent, null))
     }
@@ -55,32 +60,32 @@ class SettingsActivity : AppCompatActivity() {
     private fun writeToSupport() {
         val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.support_email)))
-            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject))
-            putExtra(Intent.EXTRA_TEXT, getString(R.string.email_body))
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(settingsInteractor.getSupportEmail()))
+            putExtra(Intent.EXTRA_SUBJECT, settingsInteractor.getEmailSubject())
+            putExtra(Intent.EXTRA_TEXT, settingsInteractor.getEmailBody())
         }
 
         try {
             startActivity(
                 Intent.createChooser(
                     emailIntent,
-                    getString(R.string.email_chooser_title)
+                    settingsInteractor.getEmailChooserTitle()
                 )
             )
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "На устройстве не найден почтовый клиент", Toast.LENGTH_SHORT)
+            Toast.makeText(this, settingsInteractor.getEmailClientNotFoundMessage(), Toast.LENGTH_SHORT)
                 .show()
         }
     }
 
     private fun openUserAgreement() {
-        val agreementUrl = getString(R.string.user_agreement_url)
+        val agreementUrl = settingsInteractor.getUserAgreementUrl()
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(agreementUrl))
 
         try {
             startActivity(browserIntent)
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "На устройстве не найден браузер", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, settingsInteractor.getBrowserNotFoundMessage(), Toast.LENGTH_SHORT).show()
         }
     }
 }
