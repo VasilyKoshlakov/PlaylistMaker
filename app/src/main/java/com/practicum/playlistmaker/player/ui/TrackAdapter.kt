@@ -1,9 +1,9 @@
 package com.practicum.playlistmaker.player.ui
 
+import com.practicum.playlistmaker.player.domain.Track
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.practicum.playlistmaker.player.domain.Track
 
 class TrackAdapter(
     private var tracks: List<Track>,

@@ -1,10 +1,10 @@
 package com.practicum.playlistmaker.player.ui
 
+import com.practicum.playlistmaker.player.domain.Track
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
-import com.practicum.playlistmaker.player.domain.Track
 import java.util.Timer
 import java.util.TimerTask
 
@@ -17,46 +17,28 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor) : ViewMode
     private val progressUpdateInterval = 500L
 
     init {
-        _playerState.value = PlayerState(
-            isPlaying = false,
-            currentPosition = 0,
-            isPrepared = false,
-            formattedCurrentTime = "00:00"
-        )
+        _playerState.value = PlayerState.createDefaultLoadingState()
     }
 
     fun preparePlayer(track: Track) {
-        playerInteractor.preparePlayer(track.previewUrl) { isPrepared ->
-            _playerState.postValue(
-                _playerState.value?.copy(isPrepared = isPrepared) ?: PlayerState(
-                    isPlaying = false,
-                    currentPosition = 0,
-                    isPrepared = isPrepared,
-                    formattedCurrentTime = "00:00"
-                )
-            )
-        }
+        _playerState.value = PlayerState.createDefaultLoadingState()
 
-        playerInteractor.setOnCompletionListener {
-            _playerState.postValue(
-                _playerState.value?.copy(
-                    isPlaying = false,
-                    currentPosition = 0,
-                    formattedCurrentTime = "00:00"
-                ) ?: PlayerState(
-                    isPlaying = false,
-                    currentPosition = 0,
-                    isPrepared = true,
-                    formattedCurrentTime = "00:00"
-                )
-            )
-            stopProgressUpdates()
+        playerInteractor.preparePlayer(track.previewUrl) { isPrepared ->
+            if (isPrepared) {
+                _playerState.postValue(PlayerState.createDefaultPreparedState())
+
+                playerInteractor.setOnCompletionListener {
+                    _playerState.postValue(PlayerState.createDefaultPreparedState())
+                    stopProgressUpdates()
+                }
+            } else {
+                _playerState.postValue(PlayerState.Error())
+            }
         }
     }
 
     fun togglePlayback() {
-        val currentState = _playerState.value
-        if (currentState?.isPlaying == true) {
+        if (playerInteractor.isPlaying()) {
             pausePlayer()
         } else {
             startPlayer()
@@ -65,14 +47,22 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor) : ViewMode
 
     private fun startPlayer() {
         playerInteractor.startPlayer()
-        _playerState.value = _playerState.value?.copy(isPlaying = true)
         startProgressUpdates()
     }
 
     private fun pausePlayer() {
         playerInteractor.pausePlayer()
-        _playerState.value = _playerState.value?.copy(isPlaying = false)
         stopProgressUpdates()
+
+        when (val currentState = _playerState.value) {
+            is PlayerState.Playing -> {
+                _playerState.value = PlayerState.Paused(
+                    currentPosition = currentState.currentPosition,
+                    formattedCurrentTime = currentState.formattedCurrentTime
+                )
+            }
+            else -> { }
+        }
     }
 
     private fun startProgressUpdates() {
@@ -81,11 +71,13 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor) : ViewMode
         progressTimer = Timer()
         progressTimer?.schedule(object : TimerTask() {
             override fun run() {
-                if (_playerState.value?.isPlaying == true) {
-                    val position = playerInteractor.getCurrentPosition()
-                    val formattedTime = playerInteractor.getFormattedTime(position.toLong())
+                val position = playerInteractor.getCurrentPosition()
+                val isPlaying = playerInteractor.isPlaying()
+                val formattedTime = playerInteractor.getFormattedTime(position.toLong())
+
+                if (isPlaying) {
                     _playerState.postValue(
-                        _playerState.value?.copy(
+                        PlayerState.Playing(
                             currentPosition = position,
                             formattedCurrentTime = formattedTime
                         )
@@ -103,12 +95,7 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor) : ViewMode
     fun releasePlayer() {
         stopProgressUpdates()
         playerInteractor.releasePlayer()
-        _playerState.value = PlayerState(
-            isPlaying = false,
-            currentPosition = 0,
-            isPrepared = false,
-            formattedCurrentTime = "00:00"
-        )
+        _playerState.value = PlayerState.createDefaultLoadingState()
     }
 
     override fun onCleared() {

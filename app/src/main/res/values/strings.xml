@@ -23,4 +23,6 @@
     <string name="clear_history">Очистить историю</string>
     <string name="unknown_genre">Неизвестный жанр</string>
     <string name="unknown_country">Неизвестная страна</string>
+    <string name="not_found_email_client">На устройстве не найден почтовый клиент</string>
+    <string name="not_found_browser">На устройстве не найден браузер</string>
 </resources>

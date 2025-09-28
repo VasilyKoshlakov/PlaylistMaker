@@ -15,6 +15,7 @@ firebaseInappmessaging = "21.0.2"
 materialVersion = "1.6.1"
 retrofit = "2.9.0"
 lifecycle = "2.9.4"
+media3Extractor = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,6 +35,7 @@ material-v161 = { module = "com.google.android.material:material", version.ref =
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle" }
+androidx-media3-extractor = { group = "androidx.media3", name = "media3-extractor", version.ref = "media3Extractor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

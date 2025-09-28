@@ -1,6 +1,6 @@
 package com.practicum.playlistmaker.player.ui
 
-import android.os.Build
+import com.practicum.playlistmaker.player.domain.Track
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -10,9 +10,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.gson.Gson
 import com.practicum.playlistmaker.creator.AppCreator
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.player.domain.Track
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -41,11 +41,12 @@ class PlayerActivity : AppCompatActivity() {
         initViews()
         observeViewModel()
 
-        val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(TRACK_KEY, Track::class.java)
+        val trackJson = intent.getStringExtra(TRACK_KEY)
+        val track = if (trackJson != null) {
+            val gson = Gson()
+            gson.fromJson(trackJson, Track::class.java)
         } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(TRACK_KEY)
+            null
         }
 
         track?.let {
@@ -76,6 +77,11 @@ class PlayerActivity : AppCompatActivity() {
         genreValueTextView = findViewById(R.id.genreValue)
         countryValueTextView = findViewById(R.id.countryValue)
         playButton = findViewById(R.id.playButton)
+
+        currentTimeTextView.text = Track.formatTime(0)
+
+        playButton.isEnabled = false
+        playButton.alpha = 0.5f
     }
 
     private fun observeViewModel() {
@@ -85,15 +91,39 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun updatePlayerUI(state: PlayerState) {
-        playButton.isEnabled = state.isPrepared
         currentTimeTextView.text = state.formattedCurrentTime
 
-        val iconRes = if (state.isPlaying) {
-            R.drawable.ic_pause_button_100
-        } else {
-            R.drawable.ic_play_button_100
+        when (state) {
+            is PlayerState.Loading -> {
+                playButton.setImageResource(R.drawable.ic_play_button_100)
+                playButton.isEnabled = false
+                playButton.alpha = 0.5f
+            }
+
+            is PlayerState.Error -> {
+                playButton.setImageResource(R.drawable.ic_play_button_100)
+                playButton.isEnabled = false
+                playButton.alpha = 0.5f
+            }
+
+            is PlayerState.Prepared -> {
+                playButton.setImageResource(R.drawable.ic_play_button_100)
+                playButton.isEnabled = true
+                playButton.alpha = 1.0f
+            }
+
+            is PlayerState.Playing -> {
+                playButton.setImageResource(R.drawable.ic_pause_button_100)
+                playButton.isEnabled = true
+                playButton.alpha = 1.0f
+            }
+
+            is PlayerState.Paused -> {
+                playButton.setImageResource(R.drawable.ic_play_button_100)
+                playButton.isEnabled = true
+                playButton.alpha = 1.0f
+            }
         }
-        playButton.setImageResource(iconRes)
     }
 
     private fun setupTrackInfo(track: Track) {
@@ -112,10 +142,13 @@ class PlayerActivity : AppCompatActivity() {
         songTextView.text = track.trackName
         artistTextView.text = track.artistName
         durationTextView.text = track.getFormattedTrackTime()
-        currentTimeTextView.text = "00:00"
 
-        track.collectionName?.let {
-            collectionNameValueTextView.text = it
+        setupOptionalFields(track)
+    }
+
+    private fun setupOptionalFields(track: Track) {
+        track.collectionName?.let { collectionName ->
+            collectionNameValueTextView.text = collectionName
             collectionNameValueTextView.visibility = View.VISIBLE
             collectionNameTextView.visibility = View.VISIBLE
         } ?: run {
@@ -123,8 +156,8 @@ class PlayerActivity : AppCompatActivity() {
             collectionNameTextView.visibility = View.GONE
         }
 
-        track.getReleaseYear()?.let {
-            releaseDateValueTextView.text = it
+        track.getReleaseYear()?.let { releaseYear ->
+            releaseDateValueTextView.text = releaseYear
             releaseDateValueTextView.visibility = View.VISIBLE
             releaseDateTextView.visibility = View.VISIBLE
         } ?: run {
@@ -136,6 +169,13 @@ class PlayerActivity : AppCompatActivity() {
         countryValueTextView.text = track.country ?: getString(R.string.unknown_country)
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (viewModel.playerState.value is PlayerState.Playing) {
+            viewModel.togglePlayback()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         viewModel.releasePlayer()
@@ -145,3 +185,4 @@ class PlayerActivity : AppCompatActivity() {
         const val TRACK_KEY = "track"
     }
 }
+

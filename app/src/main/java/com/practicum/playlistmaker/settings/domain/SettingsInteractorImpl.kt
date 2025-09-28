@@ -1,18 +1,28 @@
 package com.practicum.playlistmaker.settings.domain
 
-import android.content.Context
-import com.practicum.playlistmaker.creator.App
-import com.practicum.playlistmaker.R
+class SettingsInteractorImpl(
+    private val darkThemeProvider: () -> Boolean,
+    private val darkThemeSetter: (Boolean) -> Unit,
+    private val shareMessageProvider: () -> String,
+    private val supportEmailProvider: () -> String,
+    private val emailSubjectProvider: () -> String,
+    private val emailBodyProvider: () -> String,
+    private val userAgreementUrlProvider: () -> String,
+    private val emailChooserTitleProvider: () -> String,
+    private val emailClientNotFoundMessageProvider: () -> String,
+    private val browserNotFoundMessageProvider: () -> String
+) : SettingsInteractor {
 
-class SettingsInteractorImpl(private val context: Context) : SettingsInteractor {
-    override fun isDarkTheme(): Boolean = App.isDarkTheme()
-    override fun setDarkTheme(enabled: Boolean) = App.setDarkTheme(enabled)
-    override fun getShareMessage(): String = context.getString(R.string.share_message)
-    override fun getSupportEmail(): String = context.getString(R.string.support_email)
-    override fun getEmailSubject(): String = context.getString(R.string.email_subject)
-    override fun getEmailBody(): String = context.getString(R.string.email_body)
-    override fun getUserAgreementUrl(): String = context.getString(R.string.user_agreement_url)
-    override fun getEmailChooserTitle(): String = context.getString(R.string.email_chooser_title)
-    override fun getEmailClientNotFoundMessage(): String = "На устройстве не найден почтовый клиент"
-    override fun getBrowserNotFoundMessage(): String = "На устройстве не найден браузер"
+    override fun isDarkTheme(): Boolean = darkThemeProvider()
+
+    override fun setDarkTheme(enabled: Boolean) = darkThemeSetter(enabled)
+
+    override fun getShareMessage(): String = shareMessageProvider()
+    override fun getSupportEmail(): String = supportEmailProvider()
+    override fun getEmailSubject(): String = emailSubjectProvider()
+    override fun getEmailBody(): String = emailBodyProvider()
+    override fun getUserAgreementUrl(): String = userAgreementUrlProvider()
+    override fun getEmailChooserTitle(): String = emailChooserTitleProvider()
+    override fun getEmailClientNotFoundMessage(): String = emailClientNotFoundMessageProvider()
+    override fun getBrowserNotFoundMessage(): String = browserNotFoundMessageProvider()
 }

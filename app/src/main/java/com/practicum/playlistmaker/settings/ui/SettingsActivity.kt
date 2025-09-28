@@ -28,7 +28,15 @@ class SettingsActivity : AppCompatActivity() {
         val userAgreementButton = findViewById<ImageView>(R.id.user_agreement_button)
         val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
 
-        observeViewModel()
+        viewModel.settingsState.observe(this) { state ->
+            themeSwitcher.isChecked = state.isDarkTheme
+        }
+
+        themeSwitcher.isChecked = viewModel.settingsState.value?.isDarkTheme ?: false
+
+        themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setDarkTheme(isChecked)
+        }
 
         settingsBackButton.setOnClickListener {
             finish()
@@ -43,17 +51,6 @@ class SettingsActivity : AppCompatActivity() {
 
         userAgreementButton.setOnClickListener {
             openUserAgreement()
-        }
-
-        themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setDarkTheme(isChecked)
-        }
-    }
-
-    private fun observeViewModel() {
-        viewModel.settingsState.observe(this) { state ->
-            val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
-            themeSwitcher.isChecked = state.isDarkTheme
         }
     }
 

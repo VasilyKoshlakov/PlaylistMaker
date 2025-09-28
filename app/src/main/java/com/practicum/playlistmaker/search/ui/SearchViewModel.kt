@@ -1,10 +1,11 @@
 package com.practicum.playlistmaker.search.ui
 
+import com.practicum.playlistmaker.player.domain.Track
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.practicum.playlistmaker.player.data.TrackRepositoryImpl
 import com.practicum.playlistmaker.search.domain.SearchInteractor
-import com.practicum.playlistmaker.player.domain.Track
 import java.util.Timer
 import java.util.TimerTask
 
@@ -18,11 +19,8 @@ class SearchViewModel(private val searchInteractor: SearchInteractor) : ViewMode
     private val searchDelayMillis = 2000L
 
     init {
-        _searchState.value = SearchState(
-            tracks = emptyList(),
-            isLoading = false,
-            isError = false,
-            showHistory = true,
+        _searchState.value = SearchState.History(
+            tracks = searchInteractor.getSearchHistory(),
             searchQuery = ""
         )
     }
@@ -37,13 +35,7 @@ class SearchViewModel(private val searchInteractor: SearchInteractor) : ViewMode
 
         searchTimer?.cancel()
 
-        _searchState.value = SearchState(
-            tracks = emptyList(),
-            isLoading = true,
-            isError = false,
-            showHistory = false,
-            searchQuery = currentSearchQuery
-        )
+        _searchState.value = SearchState.Loading(searchQuery = currentSearchQuery)
 
         searchTimer = Timer()
         searchTimer?.schedule(object : TimerTask() {
@@ -54,23 +46,18 @@ class SearchViewModel(private val searchInteractor: SearchInteractor) : ViewMode
     }
 
     private fun performSearch(query: String) {
-        searchInteractor.searchTracks(query) { tracks ->
-            val newState = if (tracks.isEmpty()) {
-                SearchState(
-                    tracks = emptyList(),
-                    isLoading = false,
-                    isError = true,
-                    showHistory = false,
-                    searchQuery = query
-                )
-            } else {
-                SearchState(
-                    tracks = tracks,
-                    isLoading = false,
-                    isError = false,
-                    showHistory = false,
-                    searchQuery = query
-                )
+        searchInteractor.searchTracks(query) { result ->
+            val newState = when (result) {
+                is TrackRepositoryImpl.SearchResult.Success -> {
+                    if (result.tracks.isEmpty()) {
+                        SearchState.Empty(searchQuery = query)
+                    } else {
+                        SearchState.Content(tracks = result.tracks, searchQuery = query)
+                    }
+                }
+                is TrackRepositoryImpl.SearchResult.Error -> {
+                    SearchState.Error(searchQuery = query)
+                }
             }
             _searchState.postValue(newState)
         }
@@ -78,11 +65,8 @@ class SearchViewModel(private val searchInteractor: SearchInteractor) : ViewMode
 
     fun showSearchHistory() {
         val history = searchInteractor.getSearchHistory()
-        _searchState.value = SearchState(
+        _searchState.value = SearchState.History(
             tracks = history,
-            isLoading = false,
-            isError = false,
-            showHistory = true,
             searchQuery = currentSearchQuery
         )
     }
@@ -105,3 +89,4 @@ class SearchViewModel(private val searchInteractor: SearchInteractor) : ViewMode
         searchTimer?.cancel()
     }
 }
+

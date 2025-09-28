@@ -1,10 +1,10 @@
 package com.practicum.playlistmaker.player.data
 
+import com.practicum.playlistmaker.player.domain.Track
 import android.os.Handler
 import android.os.Looper
 import com.practicum.playlistmaker.search.data.SearchHistory
 import com.practicum.playlistmaker.search.data.ItunesApiService
-import com.practicum.playlistmaker.player.domain.Track
 import com.practicum.playlistmaker.player.domain.TrackRepository
 
 class TrackRepositoryImpl(
@@ -14,7 +14,7 @@ class TrackRepositoryImpl(
 
     private val handler = Handler(Looper.getMainLooper())
 
-    override fun searchTracks(query: String, callback: (List<Track>) -> Unit) {
+    override fun searchTracks(query: String, callback: (SearchResult) -> Unit) {
         Thread {
             try {
                 val response = apiService.search(query).execute()
@@ -34,12 +34,12 @@ class TrackRepositoryImpl(
                         )
                     } ?: emptyList()
 
-                    handler.post { callback(tracks) }
+                    handler.post { callback(SearchResult.Success(tracks)) }
                 } else {
-                    handler.post { callback(emptyList()) }
+                    handler.post { callback(SearchResult.Error("HTTP error: ${response.code()}")) }
                 }
             } catch (e: Exception) {
-                handler.post { callback(emptyList()) }
+                handler.post { callback(SearchResult.Error("Network error: ${e.message}")) }
             }
         }.start()
     }
@@ -54,5 +54,10 @@ class TrackRepositoryImpl(
 
     override fun clearSearchHistory() {
         searchHistory.clearHistory()
+    }
+
+    sealed class SearchResult {
+        data class Success(val tracks: List<Track>) : SearchResult()
+        data class Error(val message: String) : SearchResult()
     }
 }

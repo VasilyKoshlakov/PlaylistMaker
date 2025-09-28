@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.search.ui
 
+import com.practicum.playlistmaker.player.domain.Track
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -16,9 +17,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.practicum.playlistmaker.creator.AppCreator
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.player.domain.Track
 import com.practicum.playlistmaker.player.ui.TrackAdapter
 import com.practicum.playlistmaker.player.ui.PlayerActivity
 
@@ -60,6 +61,10 @@ class SearchActivity : AppCompatActivity() {
         observeViewModel()
 
         viewModel.showSearchHistory()
+
+        if (savedInstanceState != null) {
+            restoreState(savedInstanceState)
+        }
     }
 
     private fun initViews() {
@@ -80,10 +85,13 @@ class SearchActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = TrackAdapter(emptyList()) { track ->
+        adapter = TrackAdapter(emptyList()) { track: Track ->
             viewModel.addTrackToHistory(track)
+
             val intent = Intent(this, PlayerActivity::class.java).apply {
-                putExtra(PlayerActivity.TRACK_KEY, track)
+                val gson = Gson()
+                val trackJson = gson.toJson(track)
+                putExtra(PlayerActivity.TRACK_KEY, trackJson)
             }
             startActivity(intent)
         }
@@ -92,10 +100,13 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupHistoryRecyclerView() {
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
-        historyAdapter = TrackAdapter(emptyList()) { track ->
+        historyAdapter = TrackAdapter(emptyList()) { track: Track ->
             viewModel.addTrackToHistory(track)
+
             val intent = Intent(this, PlayerActivity::class.java).apply {
-                putExtra(PlayerActivity.TRACK_KEY, track)
+                val gson = Gson()
+                val trackJson = gson.toJson(track)
+                putExtra(PlayerActivity.TRACK_KEY, trackJson)
             }
             startActivity(intent)
         }
@@ -104,8 +115,14 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupPlaceholder() {
         refreshButton.setOnClickListener {
-            val currentState = viewModel.searchState.value
-            val query = currentState?.searchQuery ?: ""
+            val query = when (val currentState = viewModel.searchState.value) {
+                is SearchState.Content -> currentState.searchQuery
+                is SearchState.Empty -> currentState.searchQuery
+                is SearchState.Error -> currentState.searchQuery
+                is SearchState.History -> currentState.searchQuery
+                is SearchState.Loading -> currentState.searchQuery
+                null -> ""
+            }
             if (query.isNotEmpty()) {
                 viewModel.searchTracks(query)
             }
@@ -130,12 +147,12 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun updateUI(state: SearchState) {
-        when {
-            state.isLoading -> showLoading()
-            state.isError -> showError()
-            state.showHistory -> showHistory(state.tracks)
-            state.tracks.isEmpty() -> showEmptyResults()
-            else -> showResults(state.tracks)
+        when (state) {
+            is SearchState.Loading -> showLoading()
+            is SearchState.Error -> showError()
+            is SearchState.History -> showHistory(state.tracks)
+            is SearchState.Empty -> showEmptyResults()
+            is SearchState.Content -> showResults(state.tracks)
         }
     }
 
@@ -250,18 +267,30 @@ class SearchActivity : AppCompatActivity() {
         imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString(SEARCH_QUERY_KEY, viewModel.searchState.value?.searchQuery ?: "")
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
+    private fun restoreState(savedInstanceState: Bundle) {
         val savedQuery = savedInstanceState.getString(SEARCH_QUERY_KEY, "")
         if (savedQuery.isNotEmpty()) {
             viewModel.updateSearchQuery(savedQuery)
             inputEditText.setText(savedQuery)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val currentQuery = when (val state = viewModel.searchState.value) {
+            is SearchState.Content -> state.searchQuery
+            is SearchState.Empty -> state.searchQuery
+            is SearchState.Error -> state.searchQuery
+            is SearchState.History -> state.searchQuery
+            is SearchState.Loading -> state.searchQuery
+            null -> ""
+        }
+        outState.putString(SEARCH_QUERY_KEY, currentQuery)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        restoreState(savedInstanceState)
     }
 
     companion object {

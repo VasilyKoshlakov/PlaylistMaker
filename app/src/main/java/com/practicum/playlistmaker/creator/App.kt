@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 
 class App : Application() {
+
     companion object {
         private const val PREFS_NAME = "playlist_maker_prefs"
         private const val DARK_THEME_KEY = "dark_theme"

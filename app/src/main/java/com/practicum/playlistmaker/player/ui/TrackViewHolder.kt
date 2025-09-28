@@ -10,8 +10,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.player.domain.Track
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val trackName: TextView = itemView.findViewById(R.id.track_name)
@@ -22,17 +20,9 @@ class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(track: Track) {
         trackName.text = track.trackName
         artistName.text = track.artistName
-        trackTime.text = formatTrackTime(track.trackTimeMillis)
+        trackTime.text = track.getFormattedTrackTime()
 
         loadArtwork(track.artworkUrl100)
-    }
-
-    private fun formatTrackTime(millis: Long?): String {
-        return if (millis != null) {
-            SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
-        } else {
-            ""
-        }
     }
 
     private fun loadArtwork(url: String?) {
