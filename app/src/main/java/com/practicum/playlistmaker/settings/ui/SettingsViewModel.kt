@@ -11,14 +11,18 @@ class SettingsViewModel(private val settingsInteractor: SettingsInteractor) : Vi
     val settingsState: LiveData<SettingsState> = _settingsState
 
     init {
-        _settingsState.value = SettingsState(
-            isDarkTheme = settingsInteractor.isDarkTheme()
-        )
+        loadThemeState()
     }
 
     fun setDarkTheme(enabled: Boolean) {
         settingsInteractor.setDarkTheme(enabled)
         _settingsState.value = _settingsState.value?.copy(isDarkTheme = enabled)
+    }
+
+    private fun loadThemeState() {
+        _settingsState.value = SettingsState(
+            isDarkTheme = settingsInteractor.isDarkTheme()
+        )
     }
 
     fun getShareMessage(): String = settingsInteractor.getShareMessage()

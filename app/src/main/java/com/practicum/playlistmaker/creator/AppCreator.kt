@@ -1,7 +1,8 @@
 package com.practicum.playlistmaker.creator
 
 import android.content.Context
-import com.practicum.playlistmaker.player.data.MediaPlayerController
+import androidx.appcompat.app.AppCompatDelegate
+import com.practicum.playlistmaker.player.data.MediaPlayerControllerImpl
 import com.practicum.playlistmaker.search.data.SearchHistory
 import com.practicum.playlistmaker.search.data.RetrofitClient
 import com.practicum.playlistmaker.player.data.TrackRepositoryImpl
@@ -11,7 +12,7 @@ import com.practicum.playlistmaker.search.domain.SearchInteractor
 import com.practicum.playlistmaker.search.domain.SearchInteractorImpl
 import com.practicum.playlistmaker.settings.domain.SettingsInteractor
 import com.practicum.playlistmaker.player.domain.TrackRepository
-import com.practicum.playlistmaker.search.data.AppPreferences
+import com.practicum.playlistmaker.settings.data.AppPreferences
 import com.practicum.playlistmaker.settings.data.ResourcesProvider
 import com.practicum.playlistmaker.settings.domain.SettingsInteractorImpl
 
@@ -29,7 +30,7 @@ object AppCreator {
 
         val appPreferences = AppPreferences(context)
         val resourcesProvider = ResourcesProvider(context)
-        val mediaPlayerController = MediaPlayerController()
+        val mediaPlayerController = MediaPlayerControllerImpl()
 
         trackRepository = TrackRepositoryImpl(apiService, searchHistory)
 
@@ -39,7 +40,6 @@ object AppCreator {
             darkThemeProvider = { appPreferences.isDarkThemeEnabled() },
             darkThemeSetter = { enabled ->
                 appPreferences.setDarkThemeEnabled(enabled)
-                App.setDarkTheme(enabled)
             },
             shareMessageProvider = { resourcesProvider.getShareMessage() },
             supportEmailProvider = { resourcesProvider.getSupportEmail() },
@@ -48,7 +48,13 @@ object AppCreator {
             userAgreementUrlProvider = { resourcesProvider.getUserAgreementUrl() },
             emailChooserTitleProvider = { resourcesProvider.getEmailChooserTitle() },
             emailClientNotFoundMessageProvider = { resourcesProvider.getEmailClientNotFoundMessage() },
-            browserNotFoundMessageProvider = { resourcesProvider.getBrowserNotFoundMessage() }
+            browserNotFoundMessageProvider = { resourcesProvider.getBrowserNotFoundMessage() },
+            themeApplier = { enabled ->
+                AppCompatDelegate.setDefaultNightMode(
+                    if (enabled) AppCompatDelegate.MODE_NIGHT_YES
+                    else AppCompatDelegate.MODE_NIGHT_NO
+                )
+            }
         )
 
         playerInteractor = PlayerInteractorImpl(mediaPlayerController)

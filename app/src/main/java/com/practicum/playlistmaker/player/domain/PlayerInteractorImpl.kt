@@ -1,7 +1,5 @@
 package com.practicum.playlistmaker.player.domain
 
-import com.practicum.playlistmaker.player.data.MediaPlayerController
-
 class PlayerInteractorImpl(
     private val mediaPlayerController: MediaPlayerController
 ) : PlayerInteractor {

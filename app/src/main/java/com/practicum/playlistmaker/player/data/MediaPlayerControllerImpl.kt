@@ -1,13 +1,14 @@
 package com.practicum.playlistmaker.player.data
 
 import android.media.MediaPlayer
+import com.practicum.playlistmaker.player.domain.MediaPlayerController
 import java.util.Locale
 
-class MediaPlayerController {
+class MediaPlayerControllerImpl : MediaPlayerController {
     private var mediaPlayer: MediaPlayer? = null
     private var playbackPosition = 0
 
-    fun preparePlayer(previewUrl: String?, callback: (Boolean) -> Unit) {
+    override fun preparePlayer(previewUrl: String?, callback: (Boolean) -> Unit) {
         if (previewUrl.isNullOrEmpty()) {
             callback(false)
             return
@@ -31,14 +32,14 @@ class MediaPlayerController {
         }
     }
 
-    fun startPlayer() {
+    override fun startPlayer() {
         mediaPlayer?.let {
             it.seekTo(playbackPosition)
             it.start()
         }
     }
 
-    fun pausePlayer() {
+    override fun pausePlayer() {
         mediaPlayer?.let {
             if (it.isPlaying) {
                 playbackPosition = it.currentPosition
@@ -47,7 +48,7 @@ class MediaPlayerController {
         }
     }
 
-    fun releasePlayer() {
+    override fun releasePlayer() {
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
@@ -58,18 +59,18 @@ class MediaPlayerController {
         playbackPosition = 0
     }
 
-    fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: 0
+    override fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: 0
 
-    fun isPlaying(): Boolean = mediaPlayer?.isPlaying ?: false
+    override fun isPlaying(): Boolean = mediaPlayer?.isPlaying ?: false
 
-    fun setOnCompletionListener(listener: () -> Unit) {
+    override fun setOnCompletionListener(listener: () -> Unit) {
         mediaPlayer?.setOnCompletionListener {
             playbackPosition = 0
             listener()
         }
     }
 
-    fun getFormattedTime(millis: Long): String {
+    override fun getFormattedTime(millis: Long): String {
         val seconds = (millis / 1000) % 60
         val minutes = (millis / (1000 * 60)) % 60
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)

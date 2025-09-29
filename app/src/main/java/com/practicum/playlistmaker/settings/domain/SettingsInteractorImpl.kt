@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.settings.domain
 class SettingsInteractorImpl(
     private val darkThemeProvider: () -> Boolean,
     private val darkThemeSetter: (Boolean) -> Unit,
+    private val themeApplier: (Boolean) -> Unit,
     private val shareMessageProvider: () -> String,
     private val supportEmailProvider: () -> String,
     private val emailSubjectProvider: () -> String,
@@ -15,7 +16,10 @@ class SettingsInteractorImpl(
 
     override fun isDarkTheme(): Boolean = darkThemeProvider()
 
-    override fun setDarkTheme(enabled: Boolean) = darkThemeSetter(enabled)
+    override fun setDarkTheme(enabled: Boolean) {
+        darkThemeSetter(enabled)
+        themeApplier(enabled)
+    }
 
     override fun getShareMessage(): String = shareMessageProvider()
     override fun getSupportEmail(): String = supportEmailProvider()
