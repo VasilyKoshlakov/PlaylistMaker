@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker.search.ui
 
-import com.practicum.playlistmaker.player.domain.Track
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -13,21 +12,19 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.practicum.playlistmaker.creator.AppCreator
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.player.ui.TrackAdapter
 import com.practicum.playlistmaker.player.ui.PlayerActivity
+import com.practicum.playlistmaker.player.ui.TrackAdapter
+import com.practicum.playlistmaker.search.domain.Track
+import org.koin.android.ext.android.get
 
 class SearchActivity : AppCompatActivity() {
 
-    private val viewModel: SearchViewModel by viewModels {
-        SearchViewModelFactory(AppCreator.provideSearchInteractor())
-    }
+    private val viewModel: SearchViewModel by lazy { get() }
 
     private lateinit var inputEditText: EditText
     private lateinit var clearButton: ImageView
@@ -85,7 +82,7 @@ class SearchActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = TrackAdapter(emptyList()) { track: Track ->
+        adapter = TrackAdapter(emptyList()) { track ->
             viewModel.addTrackToHistory(track)
 
             val intent = Intent(this, PlayerActivity::class.java).apply {
@@ -100,7 +97,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupHistoryRecyclerView() {
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
-        historyAdapter = TrackAdapter(emptyList()) { track: Track ->
+        historyAdapter = TrackAdapter(emptyList()) { track ->
             viewModel.addTrackToHistory(track)
 
             val intent = Intent(this, PlayerActivity::class.java).apply {

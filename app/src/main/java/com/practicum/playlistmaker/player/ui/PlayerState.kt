@@ -1,6 +1,6 @@
 package com.practicum.playlistmaker.player.ui
 
-import com.practicum.playlistmaker.player.domain.Track
+import com.practicum.playlistmaker.search.domain.Track
 
 sealed interface PlayerState {
     val isPrepared: Boolean

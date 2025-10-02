@@ -1,6 +1,6 @@
 package com.practicum.playlistmaker.search.ui
 
-import com.practicum.playlistmaker.player.domain.Track
+import com.practicum.playlistmaker.search.domain.Track
 
 sealed interface SearchState {
     val searchQuery: String
