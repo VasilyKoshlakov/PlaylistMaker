@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.player.domain
+package com.practicum.playlistmaker.search.domain
 
 import java.text.SimpleDateFormat
 import java.util.Locale

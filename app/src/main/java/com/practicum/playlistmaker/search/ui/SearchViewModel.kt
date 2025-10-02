@@ -1,10 +1,10 @@
 package com.practicum.playlistmaker.search.ui
 
-import com.practicum.playlistmaker.player.domain.Track
+import com.practicum.playlistmaker.search.domain.Track
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.practicum.playlistmaker.player.data.TrackRepositoryImpl
+import com.practicum.playlistmaker.search.data.TrackRepositoryImpl
 import com.practicum.playlistmaker.search.domain.SearchInteractor
 import java.util.Timer
 import java.util.TimerTask

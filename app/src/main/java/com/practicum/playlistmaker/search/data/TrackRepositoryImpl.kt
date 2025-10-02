@@ -1,11 +1,9 @@
-package com.practicum.playlistmaker.player.data
+package com.practicum.playlistmaker.search.data
 
-import com.practicum.playlistmaker.player.domain.Track
+import com.practicum.playlistmaker.search.domain.Track
 import android.os.Handler
 import android.os.Looper
-import com.practicum.playlistmaker.search.data.SearchHistory
-import com.practicum.playlistmaker.search.data.ItunesApiService
-import com.practicum.playlistmaker.player.domain.TrackRepository
+import com.practicum.playlistmaker.search.domain.TrackRepository
 
 class TrackRepositoryImpl(
     private val apiService: ItunesApiService,
