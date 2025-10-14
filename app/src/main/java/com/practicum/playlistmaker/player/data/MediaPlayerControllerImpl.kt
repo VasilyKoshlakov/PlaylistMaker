@@ -4,7 +4,9 @@ import android.media.MediaPlayer
 import com.practicum.playlistmaker.player.domain.MediaPlayerController
 import java.util.Locale
 
-class MediaPlayerControllerImpl : MediaPlayerController {
+class MediaPlayerControllerImpl(
+    private val mediaPlayerFactory: MediaPlayerFactory
+) : MediaPlayerController {
     private var mediaPlayer: MediaPlayer? = null
     private var playbackPosition = 0
 
@@ -16,7 +18,7 @@ class MediaPlayerControllerImpl : MediaPlayerController {
 
         try {
             mediaPlayer?.release()
-            mediaPlayer = MediaPlayer().apply {
+            mediaPlayer = mediaPlayerFactory.createMediaPlayer().apply {
                 setDataSource(previewUrl)
                 setOnPreparedListener {
                     callback(true)

@@ -9,14 +9,18 @@ import org.koin.dsl.module
 
 val playerModule = module {
 
-    // Data layer
-    single<MediaPlayerController> { MediaPlayerControllerImpl() }
+    factory<MediaPlayerController> {
+        MediaPlayerControllerImpl(mediaPlayerFactory = get())
+    }
 
-    // Domain layer
-    single<PlayerInteractor> {
+    factory<PlayerInteractor> {
         PlayerInteractorImpl(mediaPlayerController = get())
     }
 
-    // Presentation layer
-    single { PlayerViewModel(playerInteractor = get()) }
+    single {
+        PlayerViewModel(
+            playerInteractor = get(),
+            gson = get()
+        )
+    }
 }

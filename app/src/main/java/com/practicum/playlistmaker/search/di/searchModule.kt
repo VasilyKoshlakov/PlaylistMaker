@@ -4,14 +4,19 @@ import com.practicum.playlistmaker.search.data.SearchHistory
 import com.practicum.playlistmaker.search.data.TrackRepositoryImpl
 import com.practicum.playlistmaker.search.domain.SearchInteractor
 import com.practicum.playlistmaker.search.domain.SearchInteractorImpl
-import com.practicum.playlistmaker.search.ui.SearchViewModel
 import com.practicum.playlistmaker.search.domain.TrackRepository
+import com.practicum.playlistmaker.search.ui.SearchViewModel
 import org.koin.dsl.module
 
 val searchModule = module {
 
     // Data layer
-    single { SearchHistory(get()) }
+    single {
+        SearchHistory(
+            sharedPreferences = get(),
+            gson = get()
+        )
+    }
 
     single<TrackRepository> {
         TrackRepositoryImpl(
@@ -21,10 +26,15 @@ val searchModule = module {
     }
 
     // Domain layer
-    single<SearchInteractor> {
+    factory<SearchInteractor> {
         SearchInteractorImpl(repository = get())
     }
 
     // Presentation layer
-    single { SearchViewModel(searchInteractor = get()) }
+    single {
+        SearchViewModel(
+            searchInteractor = get(),
+            gson = get()
+        )
+    }
 }

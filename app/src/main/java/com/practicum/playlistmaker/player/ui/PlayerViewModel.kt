@@ -4,11 +4,23 @@ import com.practicum.playlistmaker.search.domain.Track
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
 import java.util.Timer
 import java.util.TimerTask
 
-class PlayerViewModel(private val playerInteractor: PlayerInteractor) : ViewModel() {
+class PlayerViewModel(
+    private val playerInteractor: PlayerInteractor,
+    private val gson: Gson
+) : ViewModel() {
+
+    fun jsonToTrack(trackJson: String): Track? {
+        return try {
+            gson.fromJson(trackJson, Track::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     private val _playerState = MutableLiveData<PlayerState>()
     val playerState: LiveData<PlayerState> = _playerState

@@ -15,7 +15,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.player.ui.PlayerActivity
 import com.practicum.playlistmaker.player.ui.TrackAdapter
@@ -86,8 +85,7 @@ class SearchActivity : AppCompatActivity() {
             viewModel.addTrackToHistory(track)
 
             val intent = Intent(this, PlayerActivity::class.java).apply {
-                val gson = Gson()
-                val trackJson = gson.toJson(track)
+                val trackJson = viewModel.trackToJson(track)
                 putExtra(PlayerActivity.TRACK_KEY, trackJson)
             }
             startActivity(intent)
@@ -101,8 +99,7 @@ class SearchActivity : AppCompatActivity() {
             viewModel.addTrackToHistory(track)
 
             val intent = Intent(this, PlayerActivity::class.java).apply {
-                val gson = Gson()
-                val trackJson = gson.toJson(track)
+                val trackJson = viewModel.trackToJson(track)
                 putExtra(PlayerActivity.TRACK_KEY, trackJson)
             }
             startActivity(intent)
@@ -133,13 +130,6 @@ class SearchActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.searchState.observe(this) { state ->
             updateUI(state)
-
-            if (inputEditText.text.toString() != state.searchQuery) {
-                isTextChangedByUser = false
-                inputEditText.setText(state.searchQuery)
-                inputEditText.setSelection(state.searchQuery.length)
-                isTextChangedByUser = true
-            }
         }
     }
 
@@ -211,7 +201,6 @@ class SearchActivity : AppCompatActivity() {
             inputEditText.setText("")
             hideKeyboard()
             viewModel.updateSearchQuery("")
-            viewModel.showSearchHistory()
         }
     }
 
@@ -226,9 +215,9 @@ class SearchActivity : AppCompatActivity() {
                     val query = sequence.toString()
                     clearButton.visibility = if (sequence.isEmpty()) View.GONE else View.VISIBLE
 
-                    if (query.isEmpty()) {
-                        viewModel.showSearchHistory()
-                    } else {
+                    viewModel.updateSearchQuery(query)
+
+                    if (query.isNotEmpty()) {
                         viewModel.searchTracks(query)
                     }
                 }
@@ -269,6 +258,8 @@ class SearchActivity : AppCompatActivity() {
         if (savedQuery.isNotEmpty()) {
             viewModel.updateSearchQuery(savedQuery)
             inputEditText.setText(savedQuery)
+        } else {
+            viewModel.showSearchHistory()
         }
     }
 

@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.google.gson.Gson
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.search.domain.Track
 import org.koin.android.ext.android.get
@@ -40,8 +39,7 @@ class PlayerActivity : AppCompatActivity() {
 
         val trackJson = intent.getStringExtra(TRACK_KEY)
         val track = if (trackJson != null) {
-            val gson = Gson()
-            gson.fromJson(trackJson, Track::class.java)
+            viewModel.jsonToTrack(trackJson)
         } else {
             null
         }

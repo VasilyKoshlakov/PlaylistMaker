@@ -16,7 +16,7 @@ val settingsModule = module {
     single { ResourcesProvider(androidContext()) }
 
     // Domain layer
-    single<SettingsInteractor> {
+    factory<SettingsInteractor> {
         SettingsInteractorImpl(
             darkThemeProvider = { get<AppPreferences>().isDarkThemeEnabled() },
             darkThemeSetter = { enabled -> get<AppPreferences>().setDarkThemeEnabled(enabled) },

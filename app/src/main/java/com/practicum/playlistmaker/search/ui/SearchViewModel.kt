@@ -1,15 +1,19 @@
 package com.practicum.playlistmaker.search.ui
 
-import com.practicum.playlistmaker.search.domain.Track
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
 import com.practicum.playlistmaker.search.data.TrackRepositoryImpl
 import com.practicum.playlistmaker.search.domain.SearchInteractor
+import com.practicum.playlistmaker.search.domain.Track
 import java.util.Timer
 import java.util.TimerTask
 
-class SearchViewModel(private val searchInteractor: SearchInteractor) : ViewModel() {
+class SearchViewModel(
+    private val searchInteractor: SearchInteractor,
+    private val gson: Gson
+) : ViewModel() {
 
     private val _searchState = MutableLiveData<SearchState>()
     val searchState: LiveData<SearchState> = _searchState
@@ -19,10 +23,7 @@ class SearchViewModel(private val searchInteractor: SearchInteractor) : ViewMode
     private val searchDelayMillis = 2000L
 
     init {
-        _searchState.value = SearchState.History(
-            tracks = searchInteractor.getSearchHistory(),
-            searchQuery = ""
-        )
+        showSearchHistory()
     }
 
     fun searchTracks(query: String) {
@@ -82,11 +83,18 @@ class SearchViewModel(private val searchInteractor: SearchInteractor) : ViewMode
 
     fun updateSearchQuery(query: String) {
         currentSearchQuery = query
+        if (query.isEmpty()) {
+            showSearchHistory()
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
         searchTimer?.cancel()
+    }
+
+    fun trackToJson(track: Track): String {
+        return gson.toJson(track)
     }
 }
 

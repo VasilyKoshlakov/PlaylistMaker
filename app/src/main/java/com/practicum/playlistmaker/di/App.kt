@@ -2,6 +2,7 @@ package com.practicum.playlistmaker.di
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import com.practicum.playlistmaker.settings.domain.SettingsInteractor
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -21,7 +22,7 @@ class App : Application() {
 
     private fun setupTheme() {
         val koin = getKoin()
-        val settingsInteractor = koin.get<com.practicum.playlistmaker.settings.domain.SettingsInteractor>()
+        val settingsInteractor = koin.get<SettingsInteractor>()
         val isDarkTheme = settingsInteractor.isDarkTheme()
 
         AppCompatDelegate.setDefaultNightMode(
