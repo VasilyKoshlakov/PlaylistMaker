@@ -6,17 +6,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.practicum.playlistmaker.creator.AppCreator
 import com.practicum.playlistmaker.R
+import org.koin.android.ext.android.get
 
 class SettingsActivity : AppCompatActivity() {
 
-    private val viewModel: SettingsViewModel by viewModels {
-        SettingsViewModelFactory(AppCreator.provideSettingsInteractor())
-    }
+    private val viewModel: SettingsViewModel by lazy { get() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,6 +1,6 @@
-package com.practicum.playlistmaker.player.domain
+package com.practicum.playlistmaker.search.domain
 
-import com.practicum.playlistmaker.player.data.TrackRepositoryImpl
+import com.practicum.playlistmaker.search.data.TrackRepositoryImpl
 
 interface TrackRepository {
     fun searchTracks(query: String, callback: (TrackRepositoryImpl.SearchResult) -> Unit)
