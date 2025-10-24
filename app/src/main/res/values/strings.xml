@@ -25,4 +25,9 @@
     <string name="unknown_country">Неизвестная страна</string>
     <string name="not_found_email_client">На устройстве не найден почтовый клиент</string>
     <string name="not_found_browser">На устройстве не найден браузер</string>
+    <string name="new_playlist">Новый плейлист</string>
+    <string name="not_created_playlist">Вы не создали\n ни одного плейлиста</string>
+    <string name="media_empty">Ваша медиатека пуста</string>
+    <string name="favorite_tracks">Избранные треки</string>
+    <string name="playlists">Плейлисты</string>
 </resources>

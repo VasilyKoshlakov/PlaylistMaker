@@ -34,6 +34,10 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -58,4 +62,6 @@ dependencies {
     implementation(libs.lifecycle.livedata.ktx)
     implementation (libs.koin.core)
     implementation (libs.koin.android)
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.viewpager2)
 }
