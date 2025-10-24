@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -27,7 +26,6 @@ class MediaActivity : AppCompatActivity() {
         setupWindowInsets()
         setupViewPager()
         setupBackButton()
-        setupBackPressHandler()
     }
 
     private fun setupWindowInsets() {
@@ -47,24 +45,14 @@ class MediaActivity : AppCompatActivity() {
                 0 -> getString(R.string.favorite_tracks)
                 1 -> getString(R.string.playlists)
 
-                else -> ""
+                else -> getString(R.string.playlists)
             }
         }.attach()
 
-
     }
-
     private fun setupBackButton() {
         binding.buttonBackMedia.setOnClickListener {
-            finish()
+            onBackPressed()
         }
-    }
-
-    private fun setupBackPressHandler() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                finish()
-            }
-        })
     }
 }
