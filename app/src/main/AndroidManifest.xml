@@ -14,32 +14,18 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.PlaylistMaker"
         tools:ignore="ExtraText,MissingClass">
+
         <activity
-            android:name=".player.ui.PlayerActivity"
-            android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.OtherActivity"/>
-        <activity
-            android:name=".search.ui.SearchActivity"
-            android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.OtherActivity"/>
-        <activity
-            android:name=".media.ui.MediaActivity"
-            android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.OtherActivity"/>
-        <activity
-            android:name=".settings.ui.SettingsActivity"
-            android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.OtherActivity"/>
-        <activity
-            android:name=".main.ui.MainActivity"
+            android:name=".root.ui.RootActivity"
             android:exported="true"
-            android:theme="@style/Theme.PlaylistMaker.FirstActivity">
+            android:theme="@style/Theme.PlaylistMaker.FirstActivity"
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

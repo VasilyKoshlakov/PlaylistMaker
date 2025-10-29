@@ -1,18 +1,21 @@
 package com.practicum.playlistmaker.player.ui
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.search.domain.Track
 import org.koin.android.ext.android.get
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerFragment : Fragment() {
 
     private val viewModel: PlayerViewModel by lazy { get() }
 
@@ -30,14 +33,21 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var countryValueTextView: TextView
     private lateinit var playButton: ImageButton
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_player)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_player, container, false)
+    }
 
-        initViews()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        initViews(view)
         observeViewModel()
 
-        val trackJson = intent.getStringExtra(TRACK_KEY)
+        val trackJson = arguments?.getString(TRACK_KEY)
         val track = if (trackJson != null) {
             viewModel.jsonToTrack(trackJson)
         } else {
@@ -50,7 +60,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         backButton.setOnClickListener {
-            finish()
+            findNavController().navigateUp()
         }
 
         playButton.setOnClickListener {
@@ -58,20 +68,20 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun initViews() {
-        backButton = findViewById(R.id.back_button_search)
-        artworkImageView = findViewById(R.id.image)
-        songTextView = findViewById(R.id.song)
-        artistTextView = findViewById(R.id.music_group)
-        durationTextView = findViewById(R.id.timeValue)
-        currentTimeTextView = findViewById(R.id.remainingTime)
-        collectionNameTextView = findViewById(R.id.collectionName)
-        collectionNameValueTextView = findViewById(R.id.collectionNameValue)
-        releaseDateTextView = findViewById(R.id.releaseDate)
-        releaseDateValueTextView = findViewById(R.id.releaseDateValue)
-        genreValueTextView = findViewById(R.id.genreValue)
-        countryValueTextView = findViewById(R.id.countryValue)
-        playButton = findViewById(R.id.playButton)
+    private fun initViews(view: View) {
+        backButton = view.findViewById(R.id.back_button_search)
+        artworkImageView = view.findViewById(R.id.image)
+        songTextView = view.findViewById(R.id.song)
+        artistTextView = view.findViewById(R.id.music_group)
+        durationTextView = view.findViewById(R.id.timeValue)
+        currentTimeTextView = view.findViewById(R.id.remainingTime)
+        collectionNameTextView = view.findViewById(R.id.collectionName)
+        collectionNameValueTextView = view.findViewById(R.id.collectionNameValue)
+        releaseDateTextView = view.findViewById(R.id.releaseDate)
+        releaseDateValueTextView = view.findViewById(R.id.releaseDateValue)
+        genreValueTextView = view.findViewById(R.id.genreValue)
+        countryValueTextView = view.findViewById(R.id.countryValue)
+        playButton = view.findViewById(R.id.playButton)
 
         currentTimeTextView.text = Track.formatTime(0)
 
@@ -80,7 +90,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.playerState.observe(this) { state ->
+        viewModel.playerState.observe(viewLifecycleOwner) { state ->
             updatePlayerUI(state)
         }
     }
@@ -178,6 +188,7 @@ class PlayerActivity : AppCompatActivity() {
 
     companion object {
         const val TRACK_KEY = "track"
+
+
     }
 }
-
