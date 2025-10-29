@@ -17,7 +17,7 @@ class PlayerViewModel(
     fun jsonToTrack(trackJson: String): Track? {
         return try {
             gson.fromJson(trackJson, Track::class.java)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
