@@ -2,6 +2,8 @@ package com.practicum.playlistmaker.player.data
 
 import android.media.MediaPlayer
 import com.practicum.playlistmaker.player.domain.MediaPlayerController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 class MediaPlayerControllerImpl(
@@ -10,27 +12,21 @@ class MediaPlayerControllerImpl(
     private var mediaPlayer: MediaPlayer? = null
     private var playbackPosition = 0
 
-    override fun preparePlayer(previewUrl: String?, callback: (Boolean) -> Unit) {
+    override suspend fun preparePlayer(previewUrl: String?): Boolean = withContext(Dispatchers.IO) {
         if (previewUrl.isNullOrEmpty()) {
-            callback(false)
-            return
+            return@withContext false
         }
 
         try {
             mediaPlayer?.release()
             mediaPlayer = mediaPlayerFactory.createMediaPlayer().apply {
                 setDataSource(previewUrl)
-                setOnPreparedListener {
-                    callback(true)
-                }
-                setOnErrorListener { _, _, _ ->
-                    callback(false)
-                    false
-                }
-                prepareAsync()
+                prepare()
             }
+            return@withContext true
         } catch (e: Exception) {
-            callback(false)
+            e.printStackTrace()
+            return@withContext false
         }
     }
 

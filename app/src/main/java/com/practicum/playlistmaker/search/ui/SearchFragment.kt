@@ -90,7 +90,7 @@ class SearchFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = TrackAdapter(emptyList()) { track ->
-            viewModel.addTrackToHistory(track)
+            viewModel.onTrackClick(track)
             navigateToPlayer(track)
         }
         recyclerView.adapter = adapter
@@ -99,7 +99,7 @@ class SearchFragment : Fragment() {
     private fun setupHistoryRecyclerView() {
         historyRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         historyAdapter = TrackAdapter(emptyList()) { track ->
-            viewModel.addTrackToHistory(track)
+            viewModel.onTrackClick(track)
             navigateToPlayer(track)
         }
         historyRecyclerView.adapter = historyAdapter
