@@ -1,7 +1,7 @@
 package com.practicum.playlistmaker.player.domain
 
 interface PlayerInteractor {
-    fun preparePlayer(previewUrl: String?, callback: (Boolean) -> Unit)
+    suspend fun preparePlayer(previewUrl: String?): Boolean
     fun startPlayer()
     fun pausePlayer()
     fun releasePlayer()

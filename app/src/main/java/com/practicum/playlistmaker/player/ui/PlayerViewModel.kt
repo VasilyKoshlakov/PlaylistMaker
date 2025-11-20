@@ -1,13 +1,16 @@
 package com.practicum.playlistmaker.player.ui
 
-import com.practicum.playlistmaker.search.domain.Track
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
-import java.util.Timer
-import java.util.TimerTask
+import com.practicum.playlistmaker.search.domain.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class PlayerViewModel(
     private val playerInteractor: PlayerInteractor,
@@ -25,8 +28,8 @@ class PlayerViewModel(
     private val _playerState = MutableLiveData<PlayerState>()
     val playerState: LiveData<PlayerState> = _playerState
 
-    private var progressTimer: Timer? = null
-    private val progressUpdateInterval = 500L
+    private var progressJob: Job? = null
+    private val progressUpdateInterval = 300L
 
     init {
         _playerState.value = PlayerState.createDefaultLoadingState()
@@ -35,12 +38,15 @@ class PlayerViewModel(
     fun preparePlayer(track: Track) {
         _playerState.value = PlayerState.createDefaultLoadingState()
 
-        playerInteractor.preparePlayer(track.previewUrl) { isPrepared ->
+        viewModelScope.launch {
+            val isPrepared = playerInteractor.preparePlayer(track.previewUrl)
             if (isPrepared) {
                 _playerState.postValue(PlayerState.createDefaultPreparedState())
 
                 playerInteractor.setOnCompletionListener {
-                    _playerState.postValue(PlayerState.createDefaultPreparedState())
+                    _playerState.postValue(
+                        PlayerState.Prepared(formattedCurrentTime = Track.formatTime(0))
+                    )
                     stopProgressUpdates()
                 }
             } else {
@@ -80,28 +86,26 @@ class PlayerViewModel(
     private fun startProgressUpdates() {
         stopProgressUpdates()
 
-        progressTimer = Timer()
-        progressTimer?.schedule(object : TimerTask() {
-            override fun run() {
+        progressJob = viewModelScope.launch {
+            while (isActive && playerInteractor.isPlaying()) {
                 val position = playerInteractor.getCurrentPosition()
-                val isPlaying = playerInteractor.isPlaying()
                 val formattedTime = playerInteractor.getFormattedTime(position.toLong())
 
-                if (isPlaying) {
-                    _playerState.postValue(
-                        PlayerState.Playing(
-                            currentPosition = position,
-                            formattedCurrentTime = formattedTime
-                        )
+                _playerState.postValue(
+                    PlayerState.Playing(
+                        currentPosition = position,
+                        formattedCurrentTime = formattedTime
                     )
-                }
+                )
+
+                delay(progressUpdateInterval)
             }
-        }, 0, progressUpdateInterval)
+        }
     }
 
     private fun stopProgressUpdates() {
-        progressTimer?.cancel()
-        progressTimer = null
+        progressJob?.cancel()
+        progressJob = null
     }
 
     fun releasePlayer() {
@@ -115,4 +119,3 @@ class PlayerViewModel(
         releasePlayer()
     }
 }
-

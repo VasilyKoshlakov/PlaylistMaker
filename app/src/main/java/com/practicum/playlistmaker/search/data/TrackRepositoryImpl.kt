@@ -1,45 +1,43 @@
 package com.practicum.playlistmaker.search.data
 
 import com.practicum.playlistmaker.search.domain.Track
-import android.os.Handler
-import android.os.Looper
 import com.practicum.playlistmaker.search.domain.TrackRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class TrackRepositoryImpl(
     private val apiService: ItunesApiService,
     private val searchHistory: SearchHistory
 ) : TrackRepository {
 
-    private val handler = Handler(Looper.getMainLooper())
+    override fun searchTracks(query: String): Flow<SearchResult> = flow {
+        try {
+            emit(SearchResult.Loading)
 
-    override fun searchTracks(query: String, callback: (SearchResult) -> Unit) {
-        Thread {
-            try {
-                val response = apiService.search(query).execute()
-                if (response.isSuccessful) {
-                    val tracks = response.body()?.results?.map { trackDto ->
-                        Track(
-                            trackId = trackDto.trackId,
-                            trackName = trackDto.trackName,
-                            artistName = trackDto.artistName,
-                            trackTimeMillis = trackDto.trackTimeMillis,
-                            artworkUrl100 = trackDto.artworkUrl100,
-                            collectionName = trackDto.collectionName,
-                            releaseDate = trackDto.releaseDate,
-                            primaryGenreName = trackDto.primaryGenreName,
-                            country = trackDto.country,
-                            previewUrl = trackDto.previewUrl
-                        )
-                    } ?: emptyList()
-
-                    handler.post { callback(SearchResult.Success(tracks)) }
-                } else {
-                    handler.post { callback(SearchResult.Error("HTTP error: ${response.code()}")) }
-                }
-            } catch (e: Exception) {
-                handler.post { callback(SearchResult.Error("Network error: ${e.message}")) }
+            val response = apiService.search(query)
+            val tracks = response.results.map { trackDto ->
+                Track(
+                    trackId = trackDto.trackId,
+                    trackName = trackDto.trackName,
+                    artistName = trackDto.artistName,
+                    trackTimeMillis = trackDto.trackTimeMillis,
+                    artworkUrl100 = trackDto.artworkUrl100,
+                    collectionName = trackDto.collectionName,
+                    releaseDate = trackDto.releaseDate,
+                    primaryGenreName = trackDto.primaryGenreName,
+                    country = trackDto.country,
+                    previewUrl = trackDto.previewUrl
+                )
             }
-        }.start()
+
+            if (tracks.isEmpty()) {
+                emit(SearchResult.Empty)
+            } else {
+                emit(SearchResult.Success(tracks))
+            }
+        } catch (e: Exception) {
+            emit(SearchResult.Error("Network error: ${e.message}"))
+        }
     }
 
     override fun getSearchHistory(): List<Track> {
@@ -54,8 +52,10 @@ class TrackRepositoryImpl(
         searchHistory.clearHistory()
     }
 
-    sealed class SearchResult {
-        data class Success(val tracks: List<Track>) : SearchResult()
-        data class Error(val message: String) : SearchResult()
+    sealed interface SearchResult {
+        object Loading : SearchResult
+        object Empty : SearchResult
+        data class Success(val tracks: List<Track>) : SearchResult
+        data class Error(val message: String) : SearchResult
     }
 }

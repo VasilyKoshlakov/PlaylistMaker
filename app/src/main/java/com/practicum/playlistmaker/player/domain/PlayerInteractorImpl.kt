@@ -1,11 +1,14 @@
 package com.practicum.playlistmaker.player.domain
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 class PlayerInteractorImpl(
     private val mediaPlayerController: MediaPlayerController
 ) : PlayerInteractor {
 
-    override fun preparePlayer(previewUrl: String?, callback: (Boolean) -> Unit) {
-        mediaPlayerController.preparePlayer(previewUrl, callback)
+    override suspend fun preparePlayer(previewUrl: String?): Boolean = withContext(Dispatchers.IO) {
+        mediaPlayerController.preparePlayer(previewUrl)
     }
 
     override fun startPlayer() {
