@@ -26,8 +26,13 @@ class SearchViewModel(
     private val searchDelayMillis = 2000L
     private val clickDebounceMillis = 500L
 
+    private var shouldRestoreState = true
+
     init {
-        showSearchHistory()
+        if (shouldRestoreState) {
+            showSearchHistory()
+            shouldRestoreState = true
+        }
     }
 
     fun searchTracks(query: String) {
@@ -100,6 +105,44 @@ class SearchViewModel(
         currentSearchQuery = query
         if (query.isEmpty()) {
             showSearchHistory()
+        }
+    }
+    fun restoreSearchState() {
+        when (val currentState = _searchState.value) {
+            is SearchState.Content -> {
+                _searchState.value = currentState
+            }
+            is SearchState.Empty -> {
+                _searchState.value = currentState
+            }
+            is SearchState.Error -> {
+                _searchState.value = currentState
+            }
+            is SearchState.Loading -> {
+                showSearchHistory()
+            }
+            is SearchState.History -> {
+                _searchState.value = currentState
+            }
+            null -> {
+                showSearchHistory()
+            }
+        }
+    }
+
+    fun refreshSearch() {
+        when (val currentState = _searchState.value) {
+            is SearchState.Content -> {
+                searchTracks(currentState.searchQuery)
+            }
+            is SearchState.Empty -> {
+                searchTracks(currentState.searchQuery)
+            }
+            is SearchState.Error -> {
+                searchTracks(currentState.searchQuery)
+            }
+            else -> {
+            }
         }
     }
 

@@ -64,7 +64,7 @@ class SearchFragment : Fragment() {
 
         observeViewModel()
 
-        viewModel.showSearchHistory()
+        viewModel.restoreSearchState()
 
         if (savedInstanceState != null) {
             restoreState(savedInstanceState)
@@ -107,17 +107,7 @@ class SearchFragment : Fragment() {
 
     private fun setupPlaceholder() {
         refreshButton.setOnClickListener {
-            val query = when (val currentState = viewModel.searchState.value) {
-                is SearchState.Content -> currentState.searchQuery
-                is SearchState.Empty -> currentState.searchQuery
-                is SearchState.Error -> currentState.searchQuery
-                is SearchState.History -> currentState.searchQuery
-                is SearchState.Loading -> currentState.searchQuery
-                null -> ""
-            }
-            if (query.isNotEmpty()) {
-                viewModel.searchTracks(query)
-            }
+            viewModel.refreshSearch()
         }
 
         clearHistoryButton.setOnClickListener {
@@ -138,6 +128,17 @@ class SearchFragment : Fragment() {
             is SearchState.History -> showHistory(state.tracks)
             is SearchState.Empty -> showEmptyResults()
             is SearchState.Content -> showResults(state.tracks)
+        }
+
+        updateSearchEditText(state.searchQuery)
+    }
+
+    private fun updateSearchEditText(query: String) {
+        if (inputEditText.text.toString() != query) {
+            isTextChangedByUser = false
+            inputEditText.setText(query)
+            inputEditText.setSelection(query.length)
+            isTextChangedByUser = true
         }
     }
 
@@ -193,6 +194,7 @@ class SearchFragment : Fragment() {
             inputEditText.setText("")
             hideKeyboard()
             viewModel.updateSearchQuery("")
+            viewModel.showSearchHistory()
         }
     }
 
@@ -211,6 +213,8 @@ class SearchFragment : Fragment() {
 
                     if (query.isNotEmpty()) {
                         viewModel.searchTracks(query)
+                    } else {
+                        viewModel.showSearchHistory()
                     }
                 }
             }

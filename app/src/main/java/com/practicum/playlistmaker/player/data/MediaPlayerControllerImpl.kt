@@ -12,21 +12,26 @@ class MediaPlayerControllerImpl(
     private var mediaPlayer: MediaPlayer? = null
     private var playbackPosition = 0
 
-    override suspend fun preparePlayer(previewUrl: String?): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun preparePlayer(previewUrl: String?): Boolean {
         if (previewUrl.isNullOrEmpty()) {
-            return@withContext false
+            return false
         }
 
-        try {
-            mediaPlayer?.release()
-            mediaPlayer = mediaPlayerFactory.createMediaPlayer().apply {
-                setDataSource(previewUrl)
-                prepare()
+        mediaPlayer?.release()
+
+        return try {
+            val newMediaPlayer = mediaPlayerFactory.createMediaPlayer()
+            newMediaPlayer.setDataSource(previewUrl)
+
+            withContext(Dispatchers.IO) {
+                newMediaPlayer.prepare()
             }
-            return@withContext true
+
+            mediaPlayer = newMediaPlayer
+            true
         } catch (e: Exception) {
             e.printStackTrace()
-            return@withContext false
+            false
         }
     }
 

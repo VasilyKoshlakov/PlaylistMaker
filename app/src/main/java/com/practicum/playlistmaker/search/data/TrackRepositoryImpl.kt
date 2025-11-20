@@ -52,10 +52,10 @@ class TrackRepositoryImpl(
         searchHistory.clearHistory()
     }
 
-    sealed class SearchResult {
-        object Loading : SearchResult()
-        object Empty : SearchResult()
-        data class Success(val tracks: List<Track>) : SearchResult()
-        data class Error(val message: String) : SearchResult()
+    sealed interface SearchResult {
+        object Loading : SearchResult
+        object Empty : SearchResult
+        data class Success(val tracks: List<Track>) : SearchResult
+        data class Error(val message: String) : SearchResult
     }
 }

@@ -87,21 +87,17 @@ class PlayerViewModel(
         stopProgressUpdates()
 
         progressJob = viewModelScope.launch {
-            while (isActive) {
-                val isCurrentlyPlaying = playerInteractor.isPlaying()
-                if (isCurrentlyPlaying) {
-                    val position = playerInteractor.getCurrentPosition()
-                    val formattedTime = playerInteractor.getFormattedTime(position.toLong())
+            while (isActive && playerInteractor.isPlaying()) {
+                val position = playerInteractor.getCurrentPosition()
+                val formattedTime = playerInteractor.getFormattedTime(position.toLong())
 
-                    _playerState.postValue(
-                        PlayerState.Playing(
-                            currentPosition = position,
-                            formattedCurrentTime = formattedTime
-                        )
+                _playerState.postValue(
+                    PlayerState.Playing(
+                        currentPosition = position,
+                        formattedCurrentTime = formattedTime
                     )
-                } else {
-                    break
-                }
+                )
+
                 delay(progressUpdateInterval)
             }
         }
