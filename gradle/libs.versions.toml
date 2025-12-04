@@ -1,27 +1,28 @@
 [versions]
 agp = "8.13.1"
 fragmentKtx = "1.8.9"
-glide = "4.14.2"
-gson = "2.10.1"
-koinAndroidxCompose = "3.5.0"
+glide = "5.0.5"
+gson = "2.13.2"
+koinAndroidxCompose = "4.1.1"
 koinAndroidxViewmodel = "1.0.0"
 koinCore = "3.5.3"
-kotlin = "1.9.24"
-coreKtx = "1.10.1"
+kotlin = "2.2.21"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-appcompat = "1.7.0"
-kotlinxCoroutinesAndroid = "1.8.1"
-material = "1.12.0"
-activity = "1.9.3"
-constraintlayout = "2.2.0"
-firebaseInappmessaging = "21.0.2"
-materialVersion = "1.6.1"
-navigationFragmentKtx = "2.9.5"
-retrofit = "2.9.0"
-lifecycle = "2.9.4"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+appcompat = "1.7.1"
+kotlinxCoroutinesAndroid = "1.9.0"
+material = "1.13.0"
+activity = "1.12.1"
+constraintlayout = "2.2.1"
+firebaseInappmessaging = "22.0.2"
+materialVersion = "1.13.0"
+navigationFragmentKtx = "2.9.6"
+retrofit = "3.0.0"
+lifecycle = "2.10.0"
 media3Extractor = "1.8.0"
+roomRuntime = "2.8.4"
 viewpager2 = "1.1.0"
 
 [libraries]
@@ -29,6 +30,9 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
@@ -41,10 +45,12 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroidxCompose" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koinAndroidxCompose" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+#noinspection SimilarGradleDependency
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 firebase-inappmessaging = { group = "com.google.firebase", name = "firebase-inappmessaging", version.ref = "firebaseInappmessaging" }
+#noinspection SimilarGradleDependency
 material-v161 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }

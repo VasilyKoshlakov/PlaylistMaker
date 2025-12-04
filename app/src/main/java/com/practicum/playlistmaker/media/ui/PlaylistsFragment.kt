@@ -23,8 +23,4 @@ class PlaylistsFragment : Fragment() {
         view.findViewById<View>(R.id.newPlaylist)?.setOnClickListener {
         }
     }
-
-    companion object {
-        fun newInstance() = PlaylistsFragment()
-    }
 }

@@ -5,15 +5,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.practicum.playlistmaker.favorites.domain.FavoritesInteractor
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
 import com.practicum.playlistmaker.search.domain.Track
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class PlayerViewModel(
     private val playerInteractor: PlayerInteractor,
+    private val favoritesInteractor: FavoritesInteractor,
     private val gson: Gson
 ) : ViewModel() {
 
@@ -28,7 +31,12 @@ class PlayerViewModel(
     private val _playerState = MutableLiveData<PlayerState>()
     val playerState: LiveData<PlayerState> = _playerState
 
+    private val _isFavorite = MutableLiveData(false)
+    val isFavorite: LiveData<Boolean> = _isFavorite
+
+    private var currentTrack: Track? = null
     private var progressJob: Job? = null
+    private var favoriteJob: Job? = null
     private val progressUpdateInterval = 300L
 
     init {
@@ -36,6 +44,8 @@ class PlayerViewModel(
     }
 
     fun preparePlayer(track: Track) {
+        currentTrack = track
+
         _playerState.value = PlayerState.createDefaultLoadingState()
 
         viewModelScope.launch {
@@ -51,6 +61,25 @@ class PlayerViewModel(
                 }
             } else {
                 _playerState.postValue(PlayerState.Error())
+            }
+        }
+
+        loadFavoriteState(track.trackId)
+    }
+
+    private fun loadFavoriteState(trackId: Int) {
+        favoriteJob?.cancel()
+        favoriteJob = viewModelScope.launch {
+            favoritesInteractor.isFavorite(trackId).collectLatest { isFavorite ->
+                _isFavorite.postValue(isFavorite)
+            }
+        }
+    }
+
+    fun toggleFavorite() {
+        currentTrack?.let { track ->
+            viewModelScope.launch {
+                favoritesInteractor.toggleFavorite(track)
             }
         }
     }
@@ -110,6 +139,7 @@ class PlayerViewModel(
 
     fun releasePlayer() {
         stopProgressUpdates()
+        favoriteJob?.cancel()
         playerInteractor.releasePlayer()
         _playerState.value = PlayerState.createDefaultLoadingState()
     }

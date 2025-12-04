@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.practicum.playlistmaker.search.domain.SearchInteractor
 import com.practicum.playlistmaker.search.domain.Track
+import com.practicum.playlistmaker.search.domain.TrackRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,13 +27,8 @@ class SearchViewModel(
     private val searchDelayMillis = 2000L
     private val clickDebounceMillis = 500L
 
-    private var shouldRestoreState = true
-
     init {
-        if (shouldRestoreState) {
-            showSearchHistory()
-            shouldRestoreState = true
-        }
+        showSearchHistory()
     }
 
     fun searchTracks(query: String) {
@@ -56,19 +52,19 @@ class SearchViewModel(
     private suspend fun performSearch(query: String) {
         searchInteractor.searchTracks(query).collect { result ->
             val newState = when (result) {
-                is com.practicum.playlistmaker.search.data.TrackRepositoryImpl.SearchResult.Loading ->
+                is TrackRepository.SearchResult.Loading ->
                     SearchState.Loading(searchQuery = query)
-                is com.practicum.playlistmaker.search.data.TrackRepositoryImpl.SearchResult.Success -> {
+                is TrackRepository.SearchResult.Success -> {
                     if (result.tracks.isEmpty()) {
                         SearchState.Empty(searchQuery = query)
                     } else {
                         SearchState.Content(tracks = result.tracks, searchQuery = query)
                     }
                 }
-                is com.practicum.playlistmaker.search.data.TrackRepositoryImpl.SearchResult.Error -> {
+                is TrackRepository.SearchResult.Error -> {
                     SearchState.Error(searchQuery = query)
                 }
-                is com.practicum.playlistmaker.search.data.TrackRepositoryImpl.SearchResult.Empty -> {
+                is TrackRepository.SearchResult.Empty -> {
                     SearchState.Empty(searchQuery = query)
                 }
             }
@@ -85,11 +81,13 @@ class SearchViewModel(
     }
 
     fun showSearchHistory() {
-        val history = searchInteractor.getSearchHistory()
-        _searchState.value = SearchState.History(
-            tracks = history,
-            searchQuery = currentSearchQuery
-        )
+        viewModelScope.launch {
+            val history = searchInteractor.getSearchHistory()
+            _searchState.value = SearchState.History(
+                tracks = history,
+                searchQuery = currentSearchQuery
+            )
+        }
     }
 
     fun addTrackToHistory(track: Track) {
@@ -107,6 +105,7 @@ class SearchViewModel(
             showSearchHistory()
         }
     }
+
     fun restoreSearchState() {
         when (val currentState = _searchState.value) {
             is SearchState.Content -> {
