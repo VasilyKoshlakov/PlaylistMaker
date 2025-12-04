@@ -71,6 +71,11 @@ class SearchFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.restoreSearchState()
+    }
+
     private fun initViews(view: View) {
         inputEditText = view.findViewById(R.id.inputEditText)
         clearButton = view.findViewById(R.id.clearIcon)
@@ -134,7 +139,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun updateSearchEditText(query: String) {
-        if (inputEditText.text.toString() != query) {
+        if (inputEditText.text.toString() != query && !inputEditText.hasFocus()) {
             isTextChangedByUser = false
             inputEditText.setText(query)
             inputEditText.setSelection(query.length)
@@ -178,6 +183,8 @@ class SearchFragment : Fragment() {
         progressBar.visibility = View.GONE
 
         adapter.updateTracks(tracks)
+
+        clearButton.visibility = if (inputEditText.text.isNotEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun showHistory(tracks: List<Track>) {
@@ -187,6 +194,8 @@ class SearchFragment : Fragment() {
 
         historyAdapter.updateTracks(tracks)
         historyContainer.visibility = if (tracks.isEmpty()) View.GONE else View.VISIBLE
+
+        clearButton.visibility = View.GONE
     }
 
     private fun setupClearButton() {
@@ -240,8 +249,6 @@ class SearchFragment : Fragment() {
                 false
             }
         }
-
-        inputEditText.requestFocus()
     }
 
     private fun hideKeyboard() {
