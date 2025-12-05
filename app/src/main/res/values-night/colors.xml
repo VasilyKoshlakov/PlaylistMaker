@@ -18,4 +18,5 @@
     <color name="unselected_icon_color">#FFFFFFFF</color>
     <color name="selected_text_color">#3772E7</color>
     <color name="unselected_text_color">#FFFFFFFF</color>
+    <color name="like_button_active">#FFFFFFFF</color>
 </resources>

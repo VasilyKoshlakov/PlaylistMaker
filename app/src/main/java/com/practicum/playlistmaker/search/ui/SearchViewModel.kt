@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.practicum.playlistmaker.search.domain.SearchInteractor
 import com.practicum.playlistmaker.search.domain.Track
+import com.practicum.playlistmaker.search.domain.TrackRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,19 +27,22 @@ class SearchViewModel(
     private val searchDelayMillis = 2000L
     private val clickDebounceMillis = 500L
 
-    private var shouldRestoreState = true
+    private var isRestoringState = false
 
     init {
-        if (shouldRestoreState) {
-            showSearchHistory()
-            shouldRestoreState = true
-        }
+        showSearchHistory()
     }
 
     fun searchTracks(query: String) {
-        currentSearchQuery = query.trim()
+        if (isRestoringState) {
+            isRestoringState = false
+            return
+        }
 
-        if (currentSearchQuery.isEmpty()) {
+        val trimmedQuery = query.trim()
+        currentSearchQuery = trimmedQuery
+
+        if (trimmedQuery.isEmpty()) {
             showSearchHistory()
             return
         }
@@ -49,26 +53,26 @@ class SearchViewModel(
 
         searchJob = viewModelScope.launch {
             delay(searchDelayMillis)
-            performSearch(currentSearchQuery)
+            performSearch(trimmedQuery)
         }
     }
 
     private suspend fun performSearch(query: String) {
         searchInteractor.searchTracks(query).collect { result ->
             val newState = when (result) {
-                is com.practicum.playlistmaker.search.data.TrackRepositoryImpl.SearchResult.Loading ->
+                is TrackRepository.SearchResult.Loading ->
                     SearchState.Loading(searchQuery = query)
-                is com.practicum.playlistmaker.search.data.TrackRepositoryImpl.SearchResult.Success -> {
+                is TrackRepository.SearchResult.Success -> {
                     if (result.tracks.isEmpty()) {
                         SearchState.Empty(searchQuery = query)
                     } else {
                         SearchState.Content(tracks = result.tracks, searchQuery = query)
                     }
                 }
-                is com.practicum.playlistmaker.search.data.TrackRepositoryImpl.SearchResult.Error -> {
+                is TrackRepository.SearchResult.Error -> {
                     SearchState.Error(searchQuery = query)
                 }
-                is com.practicum.playlistmaker.search.data.TrackRepositoryImpl.SearchResult.Empty -> {
+                is TrackRepository.SearchResult.Empty -> {
                     SearchState.Empty(searchQuery = query)
                 }
             }
@@ -85,11 +89,13 @@ class SearchViewModel(
     }
 
     fun showSearchHistory() {
-        val history = searchInteractor.getSearchHistory()
-        _searchState.value = SearchState.History(
-            tracks = history,
-            searchQuery = currentSearchQuery
-        )
+        viewModelScope.launch {
+            val history = searchInteractor.getSearchHistory()
+            _searchState.value = SearchState.History(
+                tracks = history,
+                searchQuery = currentSearchQuery
+            )
+        }
     }
 
     fun addTrackToHistory(track: Track) {
@@ -107,16 +113,23 @@ class SearchViewModel(
             showSearchHistory()
         }
     }
+
     fun restoreSearchState() {
         when (val currentState = _searchState.value) {
             is SearchState.Content -> {
+                isRestoringState = true
                 _searchState.value = currentState
+                currentSearchQuery = currentState.searchQuery
             }
             is SearchState.Empty -> {
+                isRestoringState = true
                 _searchState.value = currentState
+                currentSearchQuery = currentState.searchQuery
             }
             is SearchState.Error -> {
+                isRestoringState = true
                 _searchState.value = currentState
+                currentSearchQuery = currentState.searchQuery
             }
             is SearchState.Loading -> {
                 showSearchHistory()

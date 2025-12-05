@@ -13,11 +13,11 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.search.domain.Track
-import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 
 class PlayerFragment : Fragment() {
 
-    private val viewModel: PlayerViewModel by lazy { get() }
+    private val viewModel: PlayerViewModel by inject()
 
     private lateinit var backButton: ImageButton
     private lateinit var artworkImageView: ImageView
@@ -32,6 +32,7 @@ class PlayerFragment : Fragment() {
     private lateinit var genreValueTextView: TextView
     private lateinit var countryValueTextView: TextView
     private lateinit var playButton: ImageButton
+    private lateinit var likeButton: ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,6 +67,10 @@ class PlayerFragment : Fragment() {
         playButton.setOnClickListener {
             viewModel.togglePlayback()
         }
+
+        likeButton.setOnClickListener {
+            viewModel.toggleFavorite()
+        }
     }
 
     private fun initViews(view: View) {
@@ -82,6 +87,7 @@ class PlayerFragment : Fragment() {
         genreValueTextView = view.findViewById(R.id.genreValue)
         countryValueTextView = view.findViewById(R.id.countryValue)
         playButton = view.findViewById(R.id.playButton)
+        likeButton = view.findViewById(R.id.likeButton)
 
         currentTimeTextView.text = Track.formatTime(0)
 
@@ -92,6 +98,10 @@ class PlayerFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.playerState.observe(viewLifecycleOwner) { state ->
             updatePlayerUI(state)
+        }
+
+        viewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
+            updateFavoriteButton(isFavorite)
         }
     }
 
@@ -128,6 +138,14 @@ class PlayerFragment : Fragment() {
                 playButton.isEnabled = true
                 playButton.alpha = 1.0f
             }
+        }
+    }
+
+    private fun updateFavoriteButton(isFavorite: Boolean) {
+        if (isFavorite) {
+            likeButton.setImageResource(R.drawable.ic_like_button_active_51)
+        } else {
+            likeButton.setImageResource(R.drawable.ic_like_button_51)
         }
     }
 
@@ -188,7 +206,5 @@ class PlayerFragment : Fragment() {
 
     companion object {
         const val TRACK_KEY = "track"
-
-
     }
 }

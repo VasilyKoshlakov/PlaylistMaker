@@ -20,6 +20,7 @@ val playerModule = module {
     single {
         PlayerViewModel(
             playerInteractor = get(),
+            favoritesInteractor = get(),
             gson = get()
         )
     }

@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.search.data
 
+import com.practicum.playlistmaker.favorites.domain.FavoritesRepository
 import com.practicum.playlistmaker.search.domain.Track
 import com.practicum.playlistmaker.search.domain.TrackRepository
 import kotlinx.coroutines.flow.Flow
@@ -7,14 +8,18 @@ import kotlinx.coroutines.flow.flow
 
 class TrackRepositoryImpl(
     private val apiService: ItunesApiService,
-    private val searchHistory: SearchHistory
+    private val searchHistory: SearchHistory,
+    private val favoritesRepository: FavoritesRepository
 ) : TrackRepository {
 
-    override fun searchTracks(query: String): Flow<SearchResult> = flow {
+    override suspend fun searchTracks(query: String): Flow<TrackRepository.SearchResult> = flow {
         try {
-            emit(SearchResult.Loading)
+            emit(TrackRepository.SearchResult.Loading)
 
             val response = apiService.search(query)
+
+            val favoriteIds = favoritesRepository.getAllFavoriteIds()
+
             val tracks = response.results.map { trackDto ->
                 Track(
                     trackId = trackDto.trackId,
@@ -26,36 +31,35 @@ class TrackRepositoryImpl(
                     releaseDate = trackDto.releaseDate,
                     primaryGenreName = trackDto.primaryGenreName,
                     country = trackDto.country,
-                    previewUrl = trackDto.previewUrl
+                    previewUrl = trackDto.previewUrl,
+                    isFavorite = favoriteIds.contains(trackDto.trackId)
                 )
             }
 
             if (tracks.isEmpty()) {
-                emit(SearchResult.Empty)
+                emit(TrackRepository.SearchResult.Empty)
             } else {
-                emit(SearchResult.Success(tracks))
+                emit(TrackRepository.SearchResult.Success(tracks))
             }
         } catch (e: Exception) {
-            emit(SearchResult.Error("Network error: ${e.message}"))
+            emit(TrackRepository.SearchResult.Error("Network error: ${e.message}"))
         }
     }
 
-    override fun getSearchHistory(): List<Track> {
-        return searchHistory.getHistory()
+    override suspend fun getSearchHistory(): List<Track> {
+        val history = searchHistory.getHistory()
+        val favoriteIds = favoritesRepository.getAllFavoriteIds()
+
+        return history.map { track ->
+            track.copy(isFavorite = favoriteIds.contains(track.trackId))
+        }
     }
 
     override fun addTrackToHistory(track: Track) {
-        searchHistory.addTrack(track)
+        searchHistory.addTrack(track.copy(isFavorite = false))
     }
 
     override fun clearSearchHistory() {
         searchHistory.clearHistory()
-    }
-
-    sealed interface SearchResult {
-        object Loading : SearchResult
-        object Empty : SearchResult
-        data class Success(val tracks: List<Track>) : SearchResult
-        data class Error(val message: String) : SearchResult
     }
 }
