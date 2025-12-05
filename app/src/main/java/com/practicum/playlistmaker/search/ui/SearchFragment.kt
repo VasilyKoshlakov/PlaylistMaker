@@ -71,11 +71,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.restoreSearchState()
-    }
-
     private fun initViews(view: View) {
         inputEditText = view.findViewById(R.id.inputEditText)
         clearButton = view.findViewById(R.id.clearIcon)
