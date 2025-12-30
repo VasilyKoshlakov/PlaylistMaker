@@ -16,11 +16,21 @@ val favoritesModule = module {
             androidContext(),
             FavoritesDatabase::class.java,
             "favorites.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration(false)
+            .build()
     }
 
     single {
         get<FavoritesDatabase>().favoriteTracksDao()
+    }
+
+    single {
+        get<FavoritesDatabase>().playlistsDao()
+    }
+
+    single {
+        get<FavoritesDatabase>().playlistTracksDao()
     }
 
     single<FavoritesRepository> {

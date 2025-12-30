@@ -9,17 +9,15 @@ import com.practicum.playlistmaker.favorites.domain.FavoritesInteractor
 import com.practicum.playlistmaker.search.domain.Track
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import javax.inject.Inject
 
-class FavoritesViewModel(
-    private val favoritesInteractor: FavoritesInteractor
-) : ViewModel(), KoinComponent {
+class FavoritesViewModel @Inject constructor(
+    private val favoritesInteractor: FavoritesInteractor,
+    private val gson: Gson
+) : ViewModel() {
 
     private val _favoritesState = MutableLiveData<FavoritesState>()
     val favoritesState: LiveData<FavoritesState> = _favoritesState
-
-    private val gson: Gson by inject()
 
     init {
         loadFavorites()
@@ -41,7 +39,6 @@ class FavoritesViewModel(
         return gson.toJson(track)
     }
 }
-
 sealed interface FavoritesState {
     object Empty : FavoritesState
     data class Content(val tracks: List<Track>) : FavoritesState

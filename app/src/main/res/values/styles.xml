@@ -174,6 +174,70 @@
         <item name="android:fontFamily">@font/ys_display_regular</item>
     </style>
 
+    <style name="TitleDescriptionPlaylistStyle">
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">@color/dark_mode</item>
+        <item name="android:textColorHint">@color/dark_mode</item>
+        <item name="android:textSize">@dimen/primary_text_size</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="TitleDescriptionPlaylistStyle_">
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">#AEAFB4</item>
+        <item name="android:textColorHint">#AEAFB4</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+
+    <style name="CreatePlaylistStyle">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/primary_text_size</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="ItemTitlePlaylistStyle">
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">@color/dark_mode</item>
+        <item name="android:textSize">@dimen/item_playlist_text_size</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    <style name="EditTextPlaylistStyle">
+        <item name="android:textColor">@color/dark_mode</item>
+        <item name="android:textColorHint">@color/dark_mode</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="BottomSheetItemTitlePlaylistStyleName">
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="BottomSheetItemTitlePlaylistStyleCount">
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textColor">@color/text_grey</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+
+
+
+
 
 
 </resources>
