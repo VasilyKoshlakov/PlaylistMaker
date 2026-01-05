@@ -11,11 +11,9 @@ import org.koin.dsl.module
 
 val settingsModule = module {
 
-    // Data layer
     single { AppPreferences(androidContext()) }
     single { ResourcesProvider(androidContext()) }
 
-    // Domain layer
     factory<SettingsInteractor> {
         SettingsInteractorImpl(
             darkThemeProvider = { get<AppPreferences>().isDarkThemeEnabled() },
@@ -37,6 +35,5 @@ val settingsModule = module {
         )
     }
 
-    // Presentation layer
     single { SettingsViewModel(settingsInteractor = get()) }
 }

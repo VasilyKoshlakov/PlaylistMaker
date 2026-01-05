@@ -56,7 +56,7 @@
         android:layout_marginTop="26dp"
         android:scaleType="centerCrop"
         app:layout_constraintDimensionRatio="1:1"
-        app:srcCompat="@drawable/image_playlist"
+        android:src="@drawable/image_playlist"
         app:layout_constraintEnd_toStartOf="@+id/right_guideline"
         app:layout_constraintStart_toStartOf="@+id/left_guideline"
         app:layout_constraintTop_toBottomOf="@+id/new_playlist"

@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.di
+    package com.practicum.playlistmaker.di
 
 import com.practicum.playlistmaker.favorites.di.favoritesModule
 import com.practicum.playlistmaker.media.di.mediaModule

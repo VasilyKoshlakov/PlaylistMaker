@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker.playlists.domain
 
-import android.util.Log
 import com.practicum.playlistmaker.playlists.data.db.PlaylistEntity
 import com.practicum.playlistmaker.playlists.domain.model.Playlist
 import com.practicum.playlistmaker.search.domain.Track
@@ -11,10 +10,6 @@ import javax.inject.Inject
 class PlaylistsInteractorImpl @Inject constructor(
     private val repository: PlaylistsRepository
 ) : PlaylistsInteractor {
-
-    companion object {
-        private const val TAG = "PlaylistsInteractor"
-    }
 
     override suspend fun createPlaylist(
         name: String,
@@ -28,8 +23,7 @@ class PlaylistsInteractorImpl @Inject constructor(
                 coverPath = coverPath
             )
             repository.createPlaylist(playlist)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error creating playlist", e)
+        } catch (_: Exception) {
             -1L
         }
     }
@@ -43,8 +37,7 @@ class PlaylistsInteractorImpl @Inject constructor(
                 coverPath = playlist.coverPath
             )
             repository.updatePlaylist(entity)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error updating playlist", e)
+        } catch (_: Exception) {
             null
         }
     }
@@ -52,8 +45,7 @@ class PlaylistsInteractorImpl @Inject constructor(
     override suspend fun deletePlaylist(playlistId: Long): Int? {
         return try {
             repository.deletePlaylist(playlistId)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error deleting playlist", e)
+        } catch (_: Exception) {
             null
         }
     }
@@ -65,8 +57,7 @@ class PlaylistsInteractorImpl @Inject constructor(
                 playlists.collect {
                     emit(it)
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting all playlists", e)
+            } catch (_: Exception) {
                 emit(emptyList())
             }
         }
@@ -75,8 +66,7 @@ class PlaylistsInteractorImpl @Inject constructor(
     override suspend fun getPlaylistById(playlistId: Long): Playlist? {
         return try {
             repository.getPlaylistById(playlistId)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting playlist by id", e)
+        } catch (_: Exception) {
             null
         }
     }
@@ -84,8 +74,7 @@ class PlaylistsInteractorImpl @Inject constructor(
     override suspend fun getPlaylistsCount(): Int {
         return try {
             repository.getPlaylistsCount()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting playlists count", e)
+        } catch (_: Exception) {
             0
         }
     }
@@ -97,24 +86,19 @@ class PlaylistsInteractorImpl @Inject constructor(
                 playlists.collect {
                     emit(it)
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error searching playlists", e)
+            } catch (_: Exception) {
                 emit(emptyList())
             }
         }
     }
 
     override suspend fun addTrackToPlaylist(playlistId: Long, track: Track): Boolean {
-        Log.d(TAG, "addTrackToPlaylist interactor - playlistId: $playlistId, trackId: ${track.trackId}")
         return try {
             repository.addTrackToPlaylist(playlistId, track)
-            Log.d(TAG, "Repository call completed")
             true
         } catch (_: TrackAlreadyExistsException) {
-            Log.d(TAG, "Track already exists in playlist")
             false
-        } catch (e: Exception) {
-            Log.e(TAG, "Error adding track to playlist in interactor", e)
+        } catch (_: Exception) {
             false
         }
     }
@@ -123,7 +107,6 @@ class PlaylistsInteractorImpl @Inject constructor(
         try {
             repository.removeTrackFromPlaylist(playlistId, trackId)
         } catch (e: Exception) {
-            Log.e(TAG, "Error removing track from playlist", e)
             throw e
         }
     }
@@ -131,8 +114,7 @@ class PlaylistsInteractorImpl @Inject constructor(
     override suspend fun getPlaylistWithTrackIds(playlistId: Long): PlaylistEntity? {
         return try {
             repository.getPlaylistWithTrackIds(playlistId)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting playlist with track ids", e)
+        } catch (_: Exception) {
             null
         }
     }
@@ -140,8 +122,7 @@ class PlaylistsInteractorImpl @Inject constructor(
     override suspend fun hasTrackInPlaylist(playlistId: Long, trackId: Int): Boolean {
         return try {
             repository.hasTrackInPlaylist(playlistId, trackId)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error checking if track in playlist", e)
+        } catch (_: Exception) {
             false
         }
     }
@@ -149,8 +130,7 @@ class PlaylistsInteractorImpl @Inject constructor(
     override suspend fun getTrackIdsForPlaylist(playlistId: Long): List<Int> {
         return try {
             repository.getTrackIdsForPlaylist(playlistId)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting track ids for playlist", e)
+        } catch (_: Exception) {
             emptyList()
         }
     }
@@ -158,8 +138,7 @@ class PlaylistsInteractorImpl @Inject constructor(
     override suspend fun isPlaylistNameUnique(name: String): Boolean {
         return try {
             repository.isPlaylistNameUnique(name)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error checking playlist name uniqueness", e)
+        } catch (_: Exception) {
             true
         }
     }

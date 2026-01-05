@@ -4,6 +4,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.practicum.playlistmaker.playlists.data.db.PlaylistEntity
 import com.practicum.playlistmaker.playlists.data.db.PlaylistTrackEntity
+import com.practicum.playlistmaker.playlists.data.db.PlaylistsDao
+import com.practicum.playlistmaker.playlists.data.db.PlaylistTracksDao
 
 @Database(
     entities = [
@@ -16,6 +18,6 @@ import com.practicum.playlistmaker.playlists.data.db.PlaylistTrackEntity
 )
 abstract class FavoritesDatabase : RoomDatabase() {
     abstract fun favoriteTracksDao(): FavoriteTracksDao
-    abstract fun playlistsDao(): com.practicum.playlistmaker.playlists.data.db.PlaylistsDao
-    abstract fun playlistTracksDao(): com.practicum.playlistmaker.playlists.data.db.PlaylistTracksDao
+    abstract fun playlistsDao(): PlaylistsDao
+    abstract fun playlistTracksDao(): PlaylistTracksDao
 }

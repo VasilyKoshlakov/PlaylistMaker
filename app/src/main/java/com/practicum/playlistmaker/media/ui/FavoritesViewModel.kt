@@ -9,9 +9,8 @@ import com.practicum.playlistmaker.favorites.domain.FavoritesInteractor
 import com.practicum.playlistmaker.search.domain.Track
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class FavoritesViewModel @Inject constructor(
+class FavoritesViewModel(
     private val favoritesInteractor: FavoritesInteractor,
     private val gson: Gson
 ) : ViewModel() {
@@ -39,6 +38,7 @@ class FavoritesViewModel @Inject constructor(
         return gson.toJson(track)
     }
 }
+
 sealed interface FavoritesState {
     object Empty : FavoritesState
     data class Content(val tracks: List<Track>) : FavoritesState

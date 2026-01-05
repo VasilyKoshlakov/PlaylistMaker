@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.player.data
 import android.media.MediaPlayer
 import com.practicum.playlistmaker.player.domain.MediaPlayerController
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
@@ -17,18 +18,30 @@ class MediaPlayerControllerImpl(
             return false
         }
 
-        mediaPlayer?.release()
+        releasePlayer()
 
         return try {
             val newMediaPlayer = mediaPlayerFactory.createMediaPlayer()
             newMediaPlayer.setDataSource(previewUrl)
+            newMediaPlayer.prepareAsync()
 
-            withContext(Dispatchers.IO) {
-                newMediaPlayer.prepare()
+            suspendCancellableCoroutine { continuation ->
+                val onPreparedListener = MediaPlayer.OnPreparedListener {
+                    continuation.resume(true, null)
+                }
+
+                val onErrorListener = MediaPlayer.OnErrorListener { _, what, extra ->
+                    continuation.resume(false, null)
+                    false
+                }
+
+                newMediaPlayer.setOnPreparedListener(onPreparedListener)
+                newMediaPlayer.setOnErrorListener(onErrorListener)
+
+                continuation.invokeOnCancellation {
+                    newMediaPlayer.release()
+                }
             }
-
-            mediaPlayer = newMediaPlayer
-            true
         } catch (e: Exception) {
             e.printStackTrace()
             false

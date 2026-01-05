@@ -49,4 +49,18 @@
     <string name="playlist_not_found">Плейлист не найден</string>
     <string name="add_to_playlist_error">Ошибка при добавлении в плейлист</string>
 
+    <plurals name="track_count">
+        <item quantity="one">%d трек</item>
+        <item quantity="few">%d трека</item>
+        <item quantity="many">%d треков</item>
+        <item quantity="other">%d треков</item>
+    </plurals>
+
+    <plurals name="playlist_track_count">
+        <item quantity="one">%d трек</item>
+        <item quantity="few">%d трека</item>
+        <item quantity="many">%d треков</item>
+        <item quantity="other">%d треков</item>
+    </plurals>
+
 </resources>

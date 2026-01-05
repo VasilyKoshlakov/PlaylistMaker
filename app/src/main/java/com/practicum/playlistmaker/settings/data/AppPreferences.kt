@@ -2,6 +2,7 @@ package com.practicum.playlistmaker.settings.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 class AppPreferences(context: Context) {
 
@@ -17,6 +18,6 @@ class AppPreferences(context: Context) {
     }
 
     fun setDarkThemeEnabled(enabled: Boolean) {
-        sharedPreferences.edit().putBoolean(DARK_THEME_KEY, enabled).apply()
+        sharedPreferences.edit { putBoolean(DARK_THEME_KEY, enabled) }
     }
 }

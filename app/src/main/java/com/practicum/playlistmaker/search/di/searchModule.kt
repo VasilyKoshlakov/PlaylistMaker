@@ -10,7 +10,6 @@ import org.koin.dsl.module
 
 val searchModule = module {
 
-    // Data layer
     single {
         SearchHistory(
             sharedPreferences = get(),
@@ -26,12 +25,10 @@ val searchModule = module {
         )
     }
 
-    // Domain layer
     factory<SearchInteractor> {
         SearchInteractorImpl(repository = get())
     }
 
-    // Presentation layer
     single {
         SearchViewModel(
             searchInteractor = get(),

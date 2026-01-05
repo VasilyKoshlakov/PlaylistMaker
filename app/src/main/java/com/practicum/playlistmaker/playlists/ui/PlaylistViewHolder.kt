@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.playlists.ui
 
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,22 +21,18 @@ class PlaylistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(playlist: Playlist) {
         titlePlaylist.text = playlist.name
 
-        trackCount.text = getTrackCountText(playlist.trackCount)
+        trackCount.text = itemView.context.resources.getQuantityString(
+            R.plurals.track_count,
+            playlist.trackCount,
+            playlist.trackCount
+        )
         trackCount.visibility = View.VISIBLE
 
         loadCoverImage(playlist.coverPath)
     }
 
-    private fun getTrackCountText(count: Int): String {
-        return when {
-            count % 10 == 1 && count % 100 != 11 -> "$count трек"
-            count % 10 in 2..4 && count % 100 !in 12..14 -> "$count трека"
-            else -> "$count треков"
-        }
-    }
-
     private fun loadCoverImage(coverPath: String?) {
-        val radius = 8.dpToPx(itemView.context)
+        val radius = dpToPx(8, itemView.context)
 
         if (coverPath != null && File(coverPath).exists()) {
             Glide.with(itemView)
@@ -49,6 +46,14 @@ class PlaylistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         }
     }
 
+    private fun dpToPx(dp: Int, context: android.content.Context): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp.toFloat(),
+            context.resources.displayMetrics
+        ).toInt()
+    }
+
     companion object {
         fun create(parent: ViewGroup): PlaylistViewHolder {
             val view = LayoutInflater.from(parent.context)
@@ -56,8 +61,4 @@ class PlaylistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             return PlaylistViewHolder(view)
         }
     }
-}
-
-private fun Int.dpToPx(context: android.content.Context): Int {
-    return (this * context.resources.displayMetrics.density).toInt()
 }

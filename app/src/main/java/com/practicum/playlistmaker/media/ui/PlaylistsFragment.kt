@@ -7,8 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.databinding.FragmentPlaylistsBinding
+import com.practicum.playlistmaker.playlists.domain.model.Playlist
 import com.practicum.playlistmaker.playlists.ui.PlaylistAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -16,46 +17,38 @@ class PlaylistsFragment : Fragment() {
 
     private val viewModel: PlaylistsViewModel by viewModel()
 
-    private lateinit var newPlaylistButton: View
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var placeholderImage: View
-    private lateinit var placeholderText: View
+    private var _binding: FragmentPlaylistsBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var adapter: PlaylistAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_playlists, container, false)
+    ): View {
+        _binding = FragmentPlaylistsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initViews(view)
         setupRecyclerView()
         setupListeners()
         observeViewModel()
     }
 
-    private fun initViews(view: View) {
-        newPlaylistButton = view.findViewById(R.id.newPlaylist)
-        recyclerView = view.findViewById(R.id.playlists_recycler_view)
-        placeholderImage = view.findViewById(R.id.placeholderPlaylistEmpty)
-        placeholderText = view.findViewById(R.id.not_created_playlist)
-    }
-
     private fun setupRecyclerView() {
         val layoutManager = GridLayoutManager(requireContext(), 2)
-        recyclerView.layoutManager = layoutManager
+        binding.playlistsRecyclerView.layoutManager = layoutManager
 
         adapter = PlaylistAdapter()
-        recyclerView.adapter = adapter
+        binding.playlistsRecyclerView.adapter = adapter
     }
 
     private fun setupListeners() {
-        newPlaylistButton.setOnClickListener {
+        binding.newPlaylist.setOnClickListener {
             navigateToCreatePlaylist()
         }
     }
@@ -78,15 +71,15 @@ class PlaylistsFragment : Fragment() {
     }
 
     private fun showPlaceholder() {
-        recyclerView.visibility = View.GONE
-        placeholderImage.visibility = View.VISIBLE
-        placeholderText.visibility = View.VISIBLE
+        binding.playlistsRecyclerView.visibility = View.GONE
+        binding.placeholderPlaylistEmpty.visibility = View.VISIBLE
+        binding.notCreatedPlaylist.visibility = View.VISIBLE
     }
 
-    private fun showPlaylists(playlists: List<com.practicum.playlistmaker.playlists.domain.model.Playlist>) {
-        recyclerView.visibility = View.VISIBLE
-        placeholderImage.visibility = View.GONE
-        placeholderText.visibility = View.GONE
+    private fun showPlaylists(playlists: List<Playlist>) {
+        binding.playlistsRecyclerView.visibility = View.VISIBLE
+        binding.placeholderPlaylistEmpty.visibility = View.GONE
+        binding.notCreatedPlaylist.visibility = View.GONE
 
         adapter.updatePlaylists(playlists)
     }
@@ -98,5 +91,10 @@ class PlaylistsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.loadPlaylists()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

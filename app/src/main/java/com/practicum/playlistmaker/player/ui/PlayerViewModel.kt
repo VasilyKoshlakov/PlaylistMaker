@@ -5,9 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.practicum.playlistmaker.common.SingleLiveEvent
 import com.practicum.playlistmaker.favorites.domain.FavoritesInteractor
 import com.practicum.playlistmaker.playlists.domain.PlaylistsInteractor
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
+import com.practicum.playlistmaker.playlists.domain.TrackAlreadyExistsException
 import com.practicum.playlistmaker.search.domain.Track
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,7 +24,6 @@ class PlayerViewModel @Inject constructor(
     private val playlistsInteractor: PlaylistsInteractor,
     private val gson: Gson
 ) : ViewModel() {
-
 
     fun jsonToTrack(trackJson: String): Track? {
         return try {
@@ -41,7 +42,7 @@ class PlayerViewModel @Inject constructor(
     private val _playlists = MutableLiveData<List<com.practicum.playlistmaker.playlists.domain.model.Playlist>>(emptyList())
     val playlists: LiveData<List<com.practicum.playlistmaker.playlists.domain.model.Playlist>> = _playlists
 
-    private val _addToPlaylistResult = MutableLiveData<AddToPlaylistResult>()
+    private val _addToPlaylistResult = SingleLiveEvent<AddToPlaylistResult>()
     val addToPlaylistResult: LiveData<AddToPlaylistResult> = _addToPlaylistResult
 
     private val _isLoading = MutableLiveData(false)
@@ -220,41 +221,44 @@ class PlayerViewModel @Inject constructor(
                 }
 
                 if (playlist == null) {
-                    _addToPlaylistResult.value = AddToPlaylistResult.Error("Плейлист не найден")
+                    withContext(Dispatchers.Main) {
+                        _addToPlaylistResult.value = AddToPlaylistResult.Error("Плейлист не найден")
+                    }
                     return@launch
                 }
 
                 val success = withContext(Dispatchers.IO) {
                     try {
                         playlistsInteractor.addTrackToPlaylist(playlistId, track)
-                    } catch (_: Exception) {
-                        false
+                    } catch (e: Exception) {
+                        if (e is TrackAlreadyExistsException) {
+                            false
+                        } else {
+                            throw e
+                        }
                     }
                 }
 
-                if (success) {
-                    _addToPlaylistResult.value = AddToPlaylistResult.Success(playlist.name)
-
-                    viewModelScope.launch(Dispatchers.IO) {
-                        delay(500)
-                        loadPlaylists()
-                    }
-                } else {
-                    _addToPlaylistResult.value = AddToPlaylistResult.AlreadyExists(playlist.name)
-                    viewModelScope.launch(Dispatchers.IO) {
-                        delay(500)
-                        loadPlaylists()
+                withContext(Dispatchers.Main) {
+                    if (success) {
+                        _addToPlaylistResult.value = AddToPlaylistResult.Success(playlist.name)
+                    } else {
+                        _addToPlaylistResult.value = AddToPlaylistResult.AlreadyExists(playlist.name)
                     }
                 }
 
-            } catch (_: Exception) {
-                _addToPlaylistResult.value = AddToPlaylistResult.Error("Ошибка при добавлении")
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _addToPlaylistResult.value = AddToPlaylistResult.Error("Ошибка при добавлении: ${e.message}")
+                }
             } finally {
-                _isLoading.value = false
+                withContext(Dispatchers.Main) {
+                    loadPlaylists()
+                    _isLoading.value = false
+                }
             }
         }
     }
-
     fun resetAddToPlaylistResult() {
         _addToPlaylistResult.value = AddToPlaylistResult.None
     }

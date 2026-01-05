@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.player.ui
 
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +26,11 @@ class PlaylistBottomSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(it
     ) {
         playlistName.text = playlist.name
 
-        trackCount.text = getTrackCountText(playlist.trackCount)
+        trackCount.text = itemView.context.resources.getQuantityString(
+            R.plurals.track_count,
+            playlist.trackCount,
+            playlist.trackCount
+        )
 
         loadCoverImage(playlist.coverPath)
 
@@ -34,20 +39,12 @@ class PlaylistBottomSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(it
         }
     }
 
-    private fun getTrackCountText(count: Int): String {
-        return when {
-            count % 10 == 1 && count % 100 != 11 -> "$count трек"
-            count % 10 in 2..4 && count % 100 !in 12..14 -> "$count трека"
-            else -> "$count треков"
-        }
-    }
-
     private fun loadCoverImage(coverPath: String?) {
-        val radius = 2.dpToPx(itemView.context)
+        val radius = dpToPx(2, itemView.context)
 
         val requestOptions = RequestOptions()
             .transform(CenterCrop(), RoundedCorners(radius))
-            .override(45.dpToPx(itemView.context))
+            .override(dpToPx(45, itemView.context))
 
         if (coverPath != null && File(coverPath).exists()) {
             Glide.with(itemView)
@@ -64,6 +61,14 @@ class PlaylistBottomSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(it
         }
     }
 
+    private fun dpToPx(dp: Int, context: android.content.Context): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp.toFloat(),
+            context.resources.displayMetrics
+        ).toInt()
+    }
+
     companion object {
         fun create(parent: ViewGroup): PlaylistBottomSheetViewHolder {
             val view = LayoutInflater.from(parent.context)
@@ -71,7 +76,4 @@ class PlaylistBottomSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(it
             return PlaylistBottomSheetViewHolder(view)
         }
     }
-}
-private fun Int.dpToPx(context: android.content.Context): Int {
-    return (this * context.resources.displayMetrics.density).toInt()
 }

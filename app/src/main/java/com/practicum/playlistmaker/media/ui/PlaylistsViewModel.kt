@@ -16,10 +16,6 @@ class PlaylistsViewModel @Inject constructor(
     private val _playlistsState = MutableLiveData<PlaylistsState>()
     val playlistsState: LiveData<PlaylistsState> = _playlistsState
 
-    init {
-        loadPlaylists()
-    }
-
     fun loadPlaylists() {
         viewModelScope.launch {
             playlistsInteractor.getAllPlaylists().collect { playlists ->
@@ -32,6 +28,7 @@ class PlaylistsViewModel @Inject constructor(
         }
     }
 }
+
 sealed interface PlaylistsState {
     object Empty : PlaylistsState
     data class Content(val playlists: List<Playlist>) : PlaylistsState
