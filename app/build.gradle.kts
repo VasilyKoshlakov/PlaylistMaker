@@ -72,5 +72,8 @@ dependencies {
     implementation (libs.androidx.room.runtime)
     implementation (libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
+    implementation(libs.kotlinx.coroutines.android.v173)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.androidx.cardview)
 
 }

@@ -6,6 +6,8 @@ import com.practicum.playlistmaker.favorites.data.db.FavoritesDatabase
 import com.practicum.playlistmaker.favorites.domain.FavoritesInteractor
 import com.practicum.playlistmaker.favorites.domain.FavoritesInteractorImpl
 import com.practicum.playlistmaker.favorites.domain.FavoritesRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -18,6 +20,7 @@ val favoritesModule = module {
             "favorites.db"
         )
             .fallbackToDestructiveMigration(false)
+            .setQueryExecutor(Dispatchers.IO.asExecutor())
             .build()
     }
 

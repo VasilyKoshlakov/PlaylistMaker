@@ -42,9 +42,11 @@ class PlaylistBottomSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(it
     private fun loadCoverImage(coverPath: String?) {
         val radius = dpToPx(2, itemView.context)
 
+        val imageSize = dpToPx(45, itemView.context)
+
         val requestOptions = RequestOptions()
             .transform(CenterCrop(), RoundedCorners(radius))
-            .override(dpToPx(45, itemView.context))
+            .override(imageSize, imageSize)
 
         if (coverPath != null && File(coverPath).exists()) {
             Glide.with(itemView)

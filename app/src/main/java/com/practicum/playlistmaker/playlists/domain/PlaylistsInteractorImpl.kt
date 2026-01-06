@@ -11,6 +11,21 @@ class PlaylistsInteractorImpl @Inject constructor(
     private val repository: PlaylistsRepository
 ) : PlaylistsInteractor {
 
+    override suspend fun addTrackToPlaylist(playlistId: Long, track: Track): Boolean {
+        return try {
+            val hasTrack = repository.hasTrackInPlaylist(playlistId, track.trackId)
+
+            if (!hasTrack) {
+                repository.addTrackToPlaylist(playlistId, track)
+                true
+            } else {
+                false
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     override suspend fun createPlaylist(
         name: String,
         description: String?,
@@ -89,17 +104,6 @@ class PlaylistsInteractorImpl @Inject constructor(
             } catch (_: Exception) {
                 emit(emptyList())
             }
-        }
-    }
-
-    override suspend fun addTrackToPlaylist(playlistId: Long, track: Track): Boolean {
-        return try {
-            repository.addTrackToPlaylist(playlistId, track)
-            true
-        } catch (_: TrackAlreadyExistsException) {
-            false
-        } catch (_: Exception) {
-            false
         }
     }
 

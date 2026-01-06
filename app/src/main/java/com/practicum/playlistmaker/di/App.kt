@@ -6,7 +6,6 @@ import com.practicum.playlistmaker.settings.domain.SettingsInteractor
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
-import com.practicum.playlistmaker.di.appModule
 
 class App : Application() {
 

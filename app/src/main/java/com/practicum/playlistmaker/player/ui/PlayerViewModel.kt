@@ -9,11 +9,11 @@ import com.practicum.playlistmaker.common.SingleLiveEvent
 import com.practicum.playlistmaker.favorites.domain.FavoritesInteractor
 import com.practicum.playlistmaker.playlists.domain.PlaylistsInteractor
 import com.practicum.playlistmaker.player.domain.PlayerInteractor
-import com.practicum.playlistmaker.playlists.domain.TrackAlreadyExistsException
 import com.practicum.playlistmaker.search.domain.Track
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -51,6 +51,7 @@ class PlayerViewModel @Inject constructor(
     private var currentTrack: Track? = null
     private var progressJob: Job? = null
     private var favoriteJob: Job? = null
+    private var isPlaying = false
     private val progressUpdateInterval = 300L
 
     init {
@@ -60,45 +61,55 @@ class PlayerViewModel @Inject constructor(
     fun preparePlayer(track: Track) {
         currentTrack = track
 
-        _playerState.value = PlayerState.createDefaultLoadingState()
+        _playerState.value = PlayerState.Prepared(
+            formattedCurrentTime = Track.formatTime(0)
+        )
 
-        viewModelScope.launch(Dispatchers.IO) {
+        loadFavoriteState(track.trackId)
+
+        viewModelScope.launch {
             try {
-                val isPrepared = playerInteractor.preparePlayer(track.previewUrl)
-                if (isPrepared) {
-                    withContext(Dispatchers.Main) {
-                        _playerState.value = PlayerState.createDefaultPreparedState()
-                    }
+                _isLoading.value = true
 
+                val isPrepared = withContext(Dispatchers.IO) {
+                    playerInteractor.preparePlayer(track.previewUrl)
+                }
+
+                if (isPrepared) {
                     playerInteractor.setOnCompletionListener {
-                        viewModelScope.launch(Dispatchers.Main) {
-                            _playerState.value = PlayerState.Prepared(formattedCurrentTime = Track.formatTime(0))
+                        viewModelScope.launch {
+                            isPlaying = false
+                            _playerState.value = PlayerState.Prepared(
+                                formattedCurrentTime = Track.formatTime(0)
+                            )
                             stopProgressUpdates()
                         }
                     }
+
+                    _playerState.value = PlayerState.Prepared(
+                        formattedCurrentTime = Track.formatTime(0)
+                    )
                 } else {
-                    withContext(Dispatchers.Main) {
-                        _playerState.value = PlayerState.Error()
-                    }
+                    _playerState.value = PlayerState.Prepared(
+                        formattedCurrentTime = Track.formatTime(0)
+                    )
                 }
             } catch (_: Exception) {
-                withContext(Dispatchers.Main) {
-                    _playerState.value = PlayerState.Error()
-                }
+                _playerState.value = PlayerState.Prepared(
+                    formattedCurrentTime = Track.formatTime(0)
+                )
+            } finally {
+                _isLoading.value = false
             }
         }
-
-        loadFavoriteState(track.trackId)
     }
 
     private fun loadFavoriteState(trackId: Int) {
         favoriteJob?.cancel()
-        favoriteJob = viewModelScope.launch(Dispatchers.IO) {
+        favoriteJob = viewModelScope.launch {
             try {
                 favoritesInteractor.isFavorite(trackId).collect { isFavorite ->
-                    withContext(Dispatchers.Main) {
-                        _isFavorite.value = isFavorite
-                    }
+                    _isFavorite.value = isFavorite
                 }
             } catch (_: Exception) {
             }
@@ -107,7 +118,7 @@ class PlayerViewModel @Inject constructor(
 
     fun toggleFavorite() {
         currentTrack?.let { track ->
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch {
                 try {
                     favoritesInteractor.toggleFavorite(track)
                 } catch (_: Exception) {
@@ -117,57 +128,80 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun togglePlayback() {
-        val isPlaying = playerInteractor.isPlaying()
+        val wasPlaying = isPlaying
 
-        if (isPlaying) {
-            pausePlayer()
-        } else {
-            startPlayer()
-        }
-    }
+        if (wasPlaying) {
+            playerInteractor.pausePlayer()
+            isPlaying = false
+            stopProgressUpdates()
 
-    private fun startPlayer() {
-        playerInteractor.startPlayer()
-        startProgressUpdates()
-    }
-
-    private fun pausePlayer() {
-        playerInteractor.pausePlayer()
-        stopProgressUpdates()
-
-        when (val currentState = _playerState.value) {
-            is PlayerState.Playing -> {
-                _playerState.value = PlayerState.Paused(
-                    currentPosition = currentState.currentPosition,
-                    formattedCurrentTime = currentState.formattedCurrentTime
-                )
+            when (val currentState = _playerState.value) {
+                is PlayerState.Playing -> {
+                    _playerState.value = PlayerState.Paused(
+                        currentPosition = currentState.currentPosition,
+                        formattedCurrentTime = currentState.formattedCurrentTime
+                    )
+                }
+                else -> {
+                    _playerState.value = PlayerState.Prepared(
+                        formattedCurrentTime = Track.formatTime(0)
+                    )
+                }
             }
-            else -> { }
+        } else {
+            playerInteractor.startPlayer()
+            isPlaying = true
+            startProgressUpdates()
+
+            when (val currentState = _playerState.value) {
+                is PlayerState.Prepared -> {
+                    _playerState.value = PlayerState.Playing(
+                        currentPosition = 0,
+                        formattedCurrentTime = Track.formatTime(0)
+                    )
+                }
+                is PlayerState.Paused -> {
+                    _playerState.value = PlayerState.Playing(
+                        currentPosition = currentState.currentPosition,
+                        formattedCurrentTime = currentState.formattedCurrentTime
+                    )
+                }
+                else -> {
+                    _playerState.value = PlayerState.Playing(
+                        currentPosition = 0,
+                        formattedCurrentTime = Track.formatTime(0)
+                    )
+                }
+            }
         }
     }
 
     private fun startProgressUpdates() {
         stopProgressUpdates()
 
-        progressJob = viewModelScope.launch(Dispatchers.IO) {
-            while (true) {
+        progressJob = viewModelScope.launch {
+            while (isActive) {
                 try {
-                    if (!playerInteractor.isPlaying()) {
+                    if (!isPlaying) {
                         break
                     }
 
-                    val position = playerInteractor.getCurrentPosition()
-                    val formattedTime = playerInteractor.getFormattedTime(position.toLong())
-
-                    withContext(Dispatchers.Main) {
-                        _playerState.value = PlayerState.Playing(
-                            currentPosition = position,
-                            formattedCurrentTime = formattedTime
-                        )
+                    val position = withContext(Dispatchers.IO) {
+                        playerInteractor.getCurrentPosition()
                     }
+
+                    val formattedTime = withContext(Dispatchers.IO) {
+                        playerInteractor.getFormattedTime(position.toLong())
+                    }
+
+                    _playerState.value = PlayerState.Playing(
+                        currentPosition = position,
+                        formattedCurrentTime = formattedTime
+                    )
 
                     delay(progressUpdateInterval)
                 } catch (_: Exception) {
+                    break
                 }
             }
         }
@@ -181,30 +215,30 @@ class PlayerViewModel @Inject constructor(
     fun releasePlayer() {
         stopProgressUpdates()
         favoriteJob?.cancel()
-        playerInteractor.releasePlayer()
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    playerInteractor.releasePlayer()
+                }
+            } catch (_: Exception) {
+            }
+        }
         _playerState.value = PlayerState.createDefaultLoadingState()
+        isPlaying = false
     }
 
     fun loadPlaylists() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
-                withContext(Dispatchers.Main) {
-                    _isLoading.value = true
-                }
+                _isLoading.value = true
 
                 playlistsInteractor.getAllPlaylists().collect { playlists ->
-                    withContext(Dispatchers.Main) {
-                        _playlists.value = playlists
-                    }
+                    _playlists.value = playlists
                 }
             } catch (_: Exception) {
-                withContext(Dispatchers.Main) {
-                    _playlists.value = emptyList()
-                }
+                _playlists.value = emptyList()
             } finally {
-                withContext(Dispatchers.Main) {
-                    _isLoading.value = false
-                }
+                _isLoading.value = false
             }
         }
     }
@@ -212,55 +246,34 @@ class PlayerViewModel @Inject constructor(
     fun addTrackToPlaylist(playlistId: Long, track: Track) {
         viewModelScope.launch {
             try {
-                withContext(Dispatchers.Main) {
-                    _isLoading.value = true
-                }
+                _isLoading.value = true
 
                 val playlist = withContext(Dispatchers.IO) {
                     playlistsInteractor.getPlaylistById(playlistId)
                 }
 
                 if (playlist == null) {
-                    withContext(Dispatchers.Main) {
-                        _addToPlaylistResult.value = AddToPlaylistResult.Error("Плейлист не найден")
-                    }
+                    _addToPlaylistResult.value = AddToPlaylistResult.Error("Плейлист не найден")
                     return@launch
                 }
 
                 val success = withContext(Dispatchers.IO) {
-                    try {
-                        playlistsInteractor.addTrackToPlaylist(playlistId, track)
-                    } catch (e: Exception) {
-                        if (e is TrackAlreadyExistsException) {
-                            false
-                        } else {
-                            throw e
-                        }
-                    }
+                    playlistsInteractor.addTrackToPlaylist(playlistId, track)
                 }
 
-                withContext(Dispatchers.Main) {
-                    if (success) {
-                        _addToPlaylistResult.value = AddToPlaylistResult.Success(playlist.name)
-                    } else {
-                        _addToPlaylistResult.value = AddToPlaylistResult.AlreadyExists(playlist.name)
-                    }
-                }
+                if (success) {
+                    _addToPlaylistResult.value = AddToPlaylistResult.Success(playlist.name)
 
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    _addToPlaylistResult.value = AddToPlaylistResult.Error("Ошибка при добавлении: ${e.message}")
-                }
-            } finally {
-                withContext(Dispatchers.Main) {
                     loadPlaylists()
-                    _isLoading.value = false
+                } else {
+                    _addToPlaylistResult.value = AddToPlaylistResult.AlreadyExists(playlist.name)
                 }
+            } catch (_: Exception) {
+                _addToPlaylistResult.value = AddToPlaylistResult.Error("Ошибка при добавлении")
+            } finally {
+                _isLoading.value = false
             }
         }
-    }
-    fun resetAddToPlaylistResult() {
-        _addToPlaylistResult.value = AddToPlaylistResult.None
     }
 
     override fun onCleared() {
