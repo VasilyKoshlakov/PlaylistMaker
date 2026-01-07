@@ -319,8 +319,8 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:layout_marginTop="24dp"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp" />
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp" />
 
         </LinearLayout>
     </FrameLayout>
