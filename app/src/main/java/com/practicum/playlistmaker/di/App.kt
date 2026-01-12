@@ -21,13 +21,16 @@ class App : Application() {
     }
 
     private fun setupTheme() {
-        val koin = getKoin()
-        val settingsInteractor = koin.get<SettingsInteractor>()
-        val isDarkTheme = settingsInteractor.isDarkTheme()
+        try {
+            val koin = getKoin()
+            val settingsInteractor = koin.get<SettingsInteractor>()
+            val isDarkTheme = settingsInteractor.isDarkTheme()
 
-        AppCompatDelegate.setDefaultNightMode(
-            if (isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
+            AppCompatDelegate.setDefaultNightMode(
+                if (isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        } catch (_: Exception) {
+        }
     }
 }

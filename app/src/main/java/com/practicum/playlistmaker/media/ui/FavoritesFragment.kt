@@ -85,6 +85,4 @@ class FavoritesFragment : Fragment() {
             )
         }
     }
-
-
 }

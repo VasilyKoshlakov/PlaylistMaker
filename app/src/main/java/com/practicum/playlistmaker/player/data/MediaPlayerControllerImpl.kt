@@ -5,61 +5,118 @@ import com.practicum.playlistmaker.player.domain.MediaPlayerController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 class MediaPlayerControllerImpl(
     private val mediaPlayerFactory: MediaPlayerFactory
 ) : MediaPlayerController {
+
     private var mediaPlayer: MediaPlayer? = null
     private var playbackPosition = 0
+    private var isPrepared = false
+
+    companion object {
+        private const val PREPARE_TIMEOUT_MS = 5000L
+    }
 
     override suspend fun preparePlayer(previewUrl: String?): Boolean {
         if (previewUrl.isNullOrEmpty()) {
             return false
         }
 
-        mediaPlayer?.release()
+        releasePlayer()
 
-        return try {
-            val newMediaPlayer = mediaPlayerFactory.createMediaPlayer()
-            newMediaPlayer.setDataSource(previewUrl)
+        return withContext(Dispatchers.IO) {
+            try {
+                val newMediaPlayer = mediaPlayerFactory.createMediaPlayer()
+                var preparationResult: Boolean
 
-            withContext(Dispatchers.IO) {
-                newMediaPlayer.prepare()
+                val latch = CountDownLatch(1)
+                val preparedFlag = AtomicBoolean(false)
+                val errorFlag = AtomicBoolean(false)
+
+                newMediaPlayer.setOnPreparedListener {
+                    preparedFlag.set(true)
+                    isPrepared = true
+                    latch.countDown()
+                }
+
+                newMediaPlayer.setOnErrorListener { _, what, extra ->
+                    errorFlag.set(true)
+                    latch.countDown()
+                    false
+                }
+
+                try {
+                    newMediaPlayer.setDataSource(previewUrl)
+                    newMediaPlayer.prepareAsync()
+
+                    val completed = latch.await(PREPARE_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+
+                    if (completed && preparedFlag.get() && !errorFlag.get()) {
+                        mediaPlayer = newMediaPlayer
+                        preparationResult = true
+                    } else {
+                        newMediaPlayer.release()
+                        preparationResult = false
+                    }
+
+                } catch (_: Exception) {
+                    newMediaPlayer.release()
+                    preparationResult = false
+                }
+
+                preparationResult
+
+            } catch (_: Exception) {
+                false
             }
-
-            mediaPlayer = newMediaPlayer
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
         }
     }
 
     override fun startPlayer() {
-        mediaPlayer?.let {
-            it.seekTo(playbackPosition)
-            it.start()
+        if (isPrepared) {
+            mediaPlayer?.let {
+                try {
+                    it.seekTo(playbackPosition)
+                    it.start()
+                } catch (_: Exception) {
+                }
+            }
         }
     }
 
     override fun pausePlayer() {
         mediaPlayer?.let {
-            if (it.isPlaying) {
-                playbackPosition = it.currentPosition
-                it.pause()
+            try {
+                if (it.isPlaying) {
+                    playbackPosition = it.currentPosition
+                    it.pause()
+                }
+            } catch (_: Exception) {
             }
         }
     }
 
     override fun releasePlayer() {
         mediaPlayer?.let {
-            if (it.isPlaying) {
-                it.stop()
+            try {
+                it.setOnPreparedListener(null)
+                it.setOnErrorListener(null)
+                it.setOnCompletionListener(null)
+
+                if (it.isPlaying) {
+                    it.stop()
+                }
+                it.release()
+            } catch (_: Exception) {
             }
-            it.release()
         }
         mediaPlayer = null
         playbackPosition = 0
+        isPrepared = false
     }
 
     override fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: 0

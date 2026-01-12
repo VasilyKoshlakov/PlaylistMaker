@@ -21,4 +21,11 @@
     <color name="selected_text_color">#3772E7</color>
     <color name="unselected_text_color">#1A1B22</color>
     <color name="like_button_active">#1A1B22</color>
+    <color name="drawable_title_description_playlist">#AEAFB4</color>
+    <color name="drawable_title_description_playlist_">#FFFFFFFF</color>
+    <color name="divider">#1A1B22</color>
+    <color name="bottom_sheet_background">#FFFFFF</color>
+    <color name="bottom_sheet_text">#1A1B22</color>
+    <color name="bottom_sheet_add_button">#FFFFFF</color>
+
 </resources>

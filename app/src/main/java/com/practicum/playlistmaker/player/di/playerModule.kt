@@ -21,6 +21,7 @@ val playerModule = module {
         PlayerViewModel(
             playerInteractor = get(),
             favoritesInteractor = get(),
+            playlistsInteractor = get(),
             gson = get()
         )
     }

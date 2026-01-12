@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="61dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/layout_playlist_image"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        app:cardCornerRadius="2dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- ImageView с match_parent -->
+        <ImageView
+            android:id="@+id/playlist_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="@drawable/rounded_image_background"
+            tools:src="@drawable/placeholder_2" />
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/playlist_name"
+        style="@style/BottomSheetItemTitlePlaylistStyleName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginTop="6dp"
+        android:maxLines="1"
+        app:layout_constraintBottom_toTopOf="@id/track_count"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/layout_playlist_image"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Название плейлиста" />
+
+    <TextView
+        android:id="@+id/track_count"
+        style="@style/BottomSheetItemTitlePlaylistStyleCount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="44dp"
+        android:maxLines="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/layout_playlist_image"
+        app:layout_constraintTop_toBottomOf="@id/playlist_name"
+
+        tools:text="10 треков" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

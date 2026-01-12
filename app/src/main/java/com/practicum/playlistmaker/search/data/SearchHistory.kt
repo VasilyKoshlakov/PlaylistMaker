@@ -4,6 +4,7 @@ import com.practicum.playlistmaker.search.domain.Track
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.core.content.edit
 
 class SearchHistory(
     private val sharedPreferences: SharedPreferences,
@@ -36,15 +37,15 @@ class SearchHistory(
     }
 
     fun clearHistory() {
-        sharedPreferences.edit().remove(historyKey).apply()
+        sharedPreferences.edit { remove(historyKey) }
     }
 
     private fun saveHistory(history: List<Track>) {
         if (history.isEmpty()) {
-            sharedPreferences.edit().remove(historyKey).apply()
+            sharedPreferences.edit { remove(historyKey) }
         } else {
             val json = gson.toJson(history)
-            sharedPreferences.edit().putString(historyKey, json).apply()
+            sharedPreferences.edit { putString(historyKey, json) }
         }
     }
 

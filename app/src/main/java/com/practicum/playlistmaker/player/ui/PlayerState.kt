@@ -34,9 +34,6 @@ sealed interface PlayerState {
     ) : PlayerState
 
     companion object {
-        fun createDefaultPreparedState(): PlayerState {
-            return Prepared(formattedCurrentTime = Track.formatTime(0))
-        }
 
         fun createDefaultLoadingState(): PlayerState {
             return Loading(formattedCurrentTime = Track.formatTime(0))

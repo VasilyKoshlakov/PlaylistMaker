@@ -9,17 +9,14 @@ import com.practicum.playlistmaker.favorites.domain.FavoritesInteractor
 import com.practicum.playlistmaker.search.domain.Track
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 class FavoritesViewModel(
-    private val favoritesInteractor: FavoritesInteractor
-) : ViewModel(), KoinComponent {
+    private val favoritesInteractor: FavoritesInteractor,
+    private val gson: Gson
+) : ViewModel() {
 
     private val _favoritesState = MutableLiveData<FavoritesState>()
     val favoritesState: LiveData<FavoritesState> = _favoritesState
-
-    private val gson: Gson by inject()
 
     init {
         loadFavorites()
