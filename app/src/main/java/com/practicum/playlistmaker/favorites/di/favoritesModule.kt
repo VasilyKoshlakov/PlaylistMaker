@@ -19,7 +19,7 @@ val favoritesModule = module {
             FavoritesDatabase::class.java,
             "favorites.db"
         )
-            .fallbackToDestructiveMigration(false)
+            .fallbackToDestructiveMigration()
             .setQueryExecutor(Dispatchers.IO.asExecutor())
             .build()
     }

@@ -27,5 +27,6 @@
     <color name="bottom_sheet_background">#FFFFFF</color>
     <color name="bottom_sheet_text">#1A1B22</color>
     <color name="bottom_sheet_add_button">#FFFFFF</color>
+    <color name="background_layout_playlist_info">#E6E8EB</color>
 
 </resources>

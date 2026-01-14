@@ -49,6 +49,13 @@
     <string name="playlist_not_found">Плейлист не найден</string>
     <string name="add_to_playlist_error">Ошибка при добавлении в плейлист</string>
 
+    <string name="minutes_format">%s мин</string>
+    <string name="share_playlist">Поделиться плейлистом</string>
+    <string name="edit_playlist">Редактировать</string>
+    <string name="save">Сохранить</string>
+    <string name="playlist_saved">Плейлист \"%1$s\" сохранён</string>
+    <string name="error_saving_playlist">Ошибка при сохранении плейлиста</string>
+
     <plurals name="track_count">
         <item quantity="one">%d трек</item>
         <item quantity="few">%d трека</item>

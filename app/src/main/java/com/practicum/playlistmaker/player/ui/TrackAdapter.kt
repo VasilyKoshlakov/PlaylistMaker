@@ -1,14 +1,16 @@
 package com.practicum.playlistmaker.player.ui
 
-import com.practicum.playlistmaker.search.domain.Track
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.practicum.playlistmaker.search.domain.Track
 
 class TrackAdapter(
     private var tracks: List<Track>,
     private val onTrackClick: (Track) -> Unit
 ) : RecyclerView.Adapter<TrackViewHolder>() {
+
+    var onLongClick: ((Track) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         return TrackViewHolder.create(parent)
@@ -19,6 +21,11 @@ class TrackAdapter(
 
         holder.itemView.setOnClickListener {
             onTrackClick(tracks[position])
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onLongClick?.invoke(tracks[position])
+            true // Consume the event
         }
     }
 

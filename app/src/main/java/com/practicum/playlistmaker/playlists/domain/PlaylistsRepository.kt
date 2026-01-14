@@ -20,4 +20,8 @@ interface PlaylistsRepository {
     suspend fun hasTrackInPlaylist(playlistId: Long, trackId: Int): Boolean
     suspend fun getTrackIdsForPlaylist(playlistId: Long): List<Int>
     suspend fun isPlaylistNameUnique(name: String): Boolean
+    suspend fun getTracksForPlaylist(playlistId: Long): List<Track>
+    suspend fun isTrackUsedInAnyPlaylist(trackId: Int): Boolean
+
+    suspend fun cleanupUnusedTracks()
 }

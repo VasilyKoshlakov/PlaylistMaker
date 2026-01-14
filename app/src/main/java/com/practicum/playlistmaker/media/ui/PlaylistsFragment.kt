@@ -5,12 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentPlaylistsBinding
-import com.practicum.playlistmaker.playlists.domain.model.Playlist
 import com.practicum.playlistmaker.playlists.ui.PlaylistAdapter
+import com.practicum.playlistmaker.playlists.ui.PlaylistInfoFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PlaylistsFragment : Fragment() {
@@ -43,7 +44,9 @@ class PlaylistsFragment : Fragment() {
         val layoutManager = GridLayoutManager(requireContext(), 2)
         binding.playlistsRecyclerView.layoutManager = layoutManager
 
-        adapter = PlaylistAdapter()
+        adapter = PlaylistAdapter { playlist ->
+            navigateToPlaylistInfo(playlist.playlistId)
+        }
         binding.playlistsRecyclerView.adapter = adapter
     }
 
@@ -76,16 +79,51 @@ class PlaylistsFragment : Fragment() {
         binding.notCreatedPlaylist.visibility = View.VISIBLE
     }
 
-    private fun showPlaylists(playlists: List<Playlist>) {
+    private fun showPlaylists(playlists: List<com.practicum.playlistmaker.playlists.domain.model.Playlist>) {
         binding.playlistsRecyclerView.visibility = View.VISIBLE
         binding.placeholderPlaylistEmpty.visibility = View.GONE
         binding.notCreatedPlaylist.visibility = View.GONE
-
         adapter.updatePlaylists(playlists)
     }
 
     private fun navigateToCreatePlaylist() {
-        findNavController().navigate(R.id.action_mediaFragment_to_createPlaylistFragment)
+        try {
+            findNavController().navigate(
+                R.id.action_mediaFragment_to_createPlaylistFragment
+            )
+        } catch (_: Exception) {
+            parentFragment?.findNavController()?.navigate(
+                R.id.action_mediaFragment_to_createPlaylistFragment
+            )
+        }
+    }
+
+    private fun navigateToPlaylistInfo(playlistId: Long) {
+        val bundle = Bundle().apply {
+            putLong(PlaylistInfoFragment.PLAYLIST_ID_KEY, playlistId)
+        }
+
+        try {
+            findNavController().navigate(
+                R.id.action_mediaFragment_to_playlistInfoFragment,
+                bundle
+            )
+        } catch (_: Exception) {
+            try {
+                parentFragment?.findNavController()?.navigate(
+                    R.id.action_mediaFragment_to_playlistInfoFragment,
+                    bundle
+                )
+            } catch (_: Exception) {
+                try {
+                    requireActivity().findNavController(R.id.nav_host_fragment).navigate(
+                        R.id.playlistInfoFragment,
+                        bundle
+                    )
+                } catch (_: Exception) {
+                }
+            }
+        }
     }
 
     override fun onResume() {
