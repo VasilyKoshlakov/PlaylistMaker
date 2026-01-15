@@ -163,15 +163,22 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:background="@drawable/bottom_sheet_background"
-            android:paddingTop="24dp">
+            android:background="@drawable/bottom_sheet_background">
+
+            <View
+                android:layout_width="50dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/bottom_sheet_drag_handle" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/playlist_info_tracks_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="12dp"
                 android:paddingStart="13dp"
                 android:paddingEnd="13dp" />
 
@@ -195,13 +202,21 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:background="@drawable/bottom_sheet_background"
-            android:paddingTop="24dp">
+            >
+
+            <View
+                android:layout_width="50dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/bottom_sheet_drag_handle" />
 
             <FrameLayout
                 android:id="@+id/playlist_info_menu_container_for_item_playlist"
                 android:layout_width="match_parent"
                 android:layout_height="61dp"
-
+                android:layout_marginTop="12dp"
                 android:paddingStart="13dp"
                 android:paddingEnd="13dp"/>
 
