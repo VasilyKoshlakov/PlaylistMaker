@@ -19,7 +19,7 @@ val favoritesModule = module {
             FavoritesDatabase::class.java,
             "favorites.db"
         )
-            .fallbackToDestructiveMigration(false)
+            .fallbackToDestructiveMigration()
             .setQueryExecutor(Dispatchers.IO.asExecutor())
             .build()
     }
@@ -34,6 +34,10 @@ val favoritesModule = module {
 
     single {
         get<FavoritesDatabase>().playlistTracksDao()
+    }
+
+    single {
+        get<FavoritesDatabase>().playlistTrackDetailsDao()
     }
 
     single<FavoritesRepository> {

@@ -23,4 +23,7 @@ interface FavoriteTracksDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM favorite_tracks WHERE trackId = :trackId LIMIT 1)")
     fun isFavorite(trackId: Int): Flow<Boolean>
+
+    @Query("SELECT * FROM favorite_tracks WHERE trackId = :trackId LIMIT 1")
+    suspend fun getById(trackId: Int): FavoriteTrackEntity?
 }

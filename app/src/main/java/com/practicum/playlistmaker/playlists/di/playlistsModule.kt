@@ -11,11 +11,14 @@ val playlistsModule = module {
     single<PlaylistsRepository> {
         PlaylistsRepositoryImpl(
             playlistsDao = get(),
-            playlistTracksDao = get()
+            playlistTracksDao = get(),
+            playlistTrackDetailsDao = get()
         )
     }
 
     single<PlaylistsInteractor> {
-        PlaylistsInteractorImpl(repository = get())
+        PlaylistsInteractorImpl(
+            repository = get()
+        )
     }
 }

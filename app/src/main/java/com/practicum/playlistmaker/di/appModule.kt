@@ -1,8 +1,10 @@
-    package com.practicum.playlistmaker.di
+package com.practicum.playlistmaker.di
 
 import com.practicum.playlistmaker.favorites.di.favoritesModule
 import com.practicum.playlistmaker.media.di.mediaModule
 import com.practicum.playlistmaker.player.di.playerModule
+import com.practicum.playlistmaker.playlists.di.playlistEditModule
+import com.practicum.playlistmaker.playlists.di.playlistInfoModule
 import com.practicum.playlistmaker.playlists.di.playlistsModule
 import com.practicum.playlistmaker.search.di.networkModule
 import com.practicum.playlistmaker.search.di.searchModule
@@ -18,6 +20,8 @@ val appModule = module {
         settingsModule,
         mediaModule,
         favoritesModule,
-        playlistsModule
+        playlistsModule,
+        playlistInfoModule,
+        playlistEditModule
     )
 }

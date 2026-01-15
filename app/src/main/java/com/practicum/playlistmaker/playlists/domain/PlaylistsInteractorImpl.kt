@@ -3,11 +3,12 @@ package com.practicum.playlistmaker.playlists.domain
 import com.practicum.playlistmaker.playlists.data.db.PlaylistEntity
 import com.practicum.playlistmaker.playlists.domain.model.Playlist
 import com.practicum.playlistmaker.search.domain.Track
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
+import kotlinx.coroutines.withContext
 
-class PlaylistsInteractorImpl @Inject constructor(
+class PlaylistsInteractorImpl(
     private val repository: PlaylistsRepository
 ) : PlaylistsInteractor {
 
@@ -107,14 +108,6 @@ class PlaylistsInteractorImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeTrackFromPlaylist(playlistId: Long, trackId: Int) {
-        try {
-            repository.removeTrackFromPlaylist(playlistId, trackId)
-        } catch (e: Exception) {
-            throw e
-        }
-    }
-
     override suspend fun getPlaylistWithTrackIds(playlistId: Long): PlaylistEntity? {
         return try {
             repository.getPlaylistWithTrackIds(playlistId)
@@ -144,6 +137,35 @@ class PlaylistsInteractorImpl @Inject constructor(
             repository.isPlaylistNameUnique(name)
         } catch (_: Exception) {
             true
+        }
+    }
+
+    override suspend fun getTracksForPlaylist(playlistId: Long): List<Track> {
+        return withContext(Dispatchers.IO) {
+            try {
+                repository.getTracksForPlaylist(playlistId)
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    override suspend fun removeTrackFromPlaylist(playlistId: Long, trackId: Int) {
+        try {
+            withContext(Dispatchers.IO) {
+                repository.removeTrackFromPlaylist(playlistId, trackId)
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun cleanupUnusedTracks() {
+        withContext(Dispatchers.IO) {
+            try {
+                repository.cleanupUnusedTracks()
+            } catch (_: Exception) {
+            }
         }
     }
 }
