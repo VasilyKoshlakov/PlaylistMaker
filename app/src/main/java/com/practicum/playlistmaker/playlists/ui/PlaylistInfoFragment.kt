@@ -100,7 +100,7 @@ class PlaylistInfoFragment : Fragment() {
         bottomSheetBehavior.isHideable = false
 
         val displayMetrics = resources.displayMetrics
-        val peekHeightPx = (200 * displayMetrics.density).toInt()
+        val peekHeightPx = (266 * displayMetrics.density).toInt()
         bottomSheetBehavior.peekHeight = peekHeightPx
 
         bottomSheetBehavior.isDraggable = true
