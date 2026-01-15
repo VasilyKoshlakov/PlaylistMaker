@@ -1,22 +1,18 @@
 package com.practicum.playlistmaker.playlists.data.db
 
-import com.practicum.playlistmaker.favorites.data.db.FavoriteTrackEntity
-import com.practicum.playlistmaker.favorites.data.db.FavoriteTracksDao
 import com.practicum.playlistmaker.playlists.domain.PlaylistsRepository
 import com.practicum.playlistmaker.playlists.domain.TrackAlreadyExistsException
 import com.practicum.playlistmaker.playlists.domain.model.Playlist
 import com.practicum.playlistmaker.search.domain.Track
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class PlaylistsRepositoryImpl @Inject constructor(
+class PlaylistsRepositoryImpl(
     private val playlistsDao: PlaylistsDao,
     private val playlistTracksDao: PlaylistTracksDao,
-    private val favoriteTracksDao: FavoriteTracksDao
+    private val playlistTrackDetailsDao: PlaylistTrackDetailsDao
 ) : PlaylistsRepository {
 
     override suspend fun createPlaylist(playlist: PlaylistEntity): Long {
@@ -110,8 +106,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
     override suspend fun addTrackToPlaylist(playlistId: Long, track: Track) {
         withContext(Dispatchers.IO) {
-            val favoriteEntity = FavoriteTrackEntity.fromTrack(track)
-            favoriteTracksDao.insert(favoriteEntity)
+            val trackDetails = PlaylistTrackDetailsEntity.fromTrack(track)
+            playlistTrackDetailsDao.insert(trackDetails)
 
             val alreadyExists = playlistTracksDao.hasTrack(playlistId, track.trackId) > 0
 
@@ -134,12 +130,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
             val tracks = mutableListOf<Track>()
 
             trackIds.forEach { trackId ->
-                val favoriteEntity = favoriteTracksDao.getById(trackId)
-
-                if (favoriteEntity != null) {
-                    val isFavorite = favoriteTracksDao.isFavorite(trackId)
-                        .firstOrNull() ?: false
-                    tracks.add(favoriteEntity.toTrack().copy(isFavorite = isFavorite))
+                val trackDetails = playlistTrackDetailsDao.getById(trackId)
+                trackDetails?.let {
+                    tracks.add(it.toTrack())
                 }
             }
 
@@ -154,11 +147,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
             val isUsedInOtherPlaylists = isTrackUsedInAnyPlaylist(trackId)
 
             if (!isUsedInOtherPlaylists) {
-                val isFavorite = favoriteTracksDao.isFavorite(trackId).firstOrNull() ?: false
-
-                if (!isFavorite) {
-                    favoriteTracksDao.delete(trackId)
-                }
+                playlistTrackDetailsDao.delete(trackId)
             }
         }
     }
@@ -198,15 +187,13 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
     override suspend fun cleanupUnusedTracks() {
         withContext(Dispatchers.IO) {
-            val allTracks = favoriteTracksDao.getAllIds()
+            val allTracks = playlistTrackDetailsDao.getAllIds()
 
             allTracks.forEach { trackId ->
                 val isUsedInPlaylists = isTrackUsedInAnyPlaylist(trackId)
 
-                val isFavorite = favoriteTracksDao.isFavorite(trackId).firstOrNull() ?: false
-
-                if (!isUsedInPlaylists && !isFavorite) {
-                    favoriteTracksDao.delete(trackId)
+                if (!isUsedInPlaylists) {
+                    playlistTrackDetailsDao.delete(trackId)
                 }
             }
         }

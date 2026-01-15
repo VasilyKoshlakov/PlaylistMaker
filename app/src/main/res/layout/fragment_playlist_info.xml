@@ -38,6 +38,7 @@
                 android:layout_marginStart="8dp"
                 android:background="@null"
                 android:contentDescription="TODO"
+                android:elevation="4dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_back_24" />
@@ -149,7 +150,7 @@
     <FrameLayout
         android:id="@+id/playlist_info_tracks_bottom_sheet"
         android:layout_width="match_parent"
-        android:layout_height="266dp"
+        android:layout_height="match_parent"
         android:background="@android:color/transparent"
         android:visibility="visible"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"

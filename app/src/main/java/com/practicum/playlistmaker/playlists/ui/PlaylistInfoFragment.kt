@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,11 +28,6 @@ import java.io.File
 import java.util.Locale
 
 class PlaylistInfoFragment : Fragment() {
-
-    companion object {
-        const val TAG = "PlaylistInfoFragment"
-        const val PLAYLIST_ID_KEY = "playlist_id"
-    }
 
     private var _binding: FragmentPlaylistInfoBinding? = null
     private val binding get() = _binding!!
@@ -75,6 +71,24 @@ class PlaylistInfoFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        hideBottomNavigation()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        showBottomNavigation()
+    }
+
+    private fun hideBottomNavigation() {
+        (activity as? com.practicum.playlistmaker.root.ui.RootActivity)?.binding?.bottomNavigationView?.isVisible = false
+    }
+
+    private fun showBottomNavigation() {
+        (activity as? com.practicum.playlistmaker.root.ui.RootActivity)?.binding?.bottomNavigationView?.isVisible = true
+    }
+
     private fun setupBackButton() {
         binding.backButtonPlaylist.setOnClickListener {
             findNavController().navigateUp()
@@ -84,29 +98,26 @@ class PlaylistInfoFragment : Fragment() {
     private fun setupBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(binding.playlistInfoTracksBottomSheet)
         bottomSheetBehavior.isHideable = false
-        bottomSheetBehavior.peekHeight = 266
+
+        val displayMetrics = resources.displayMetrics
+        val peekHeightPx = (300 * displayMetrics.density).toInt()
+        bottomSheetBehavior.peekHeight = peekHeightPx
+
         bottomSheetBehavior.isDraggable = true
 
         bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (_binding == null) return
-
-                when (newState) {
-                    BottomSheetBehavior.STATE_EXPANDED -> {}
-                    BottomSheetBehavior.STATE_COLLAPSED -> {}
-                    else -> {}
-                }
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 if (_binding == null) return
-
                 binding.overlayPlaylistInfo.alpha = slideOffset.coerceIn(0f, 0.5f)
             }
         }
 
-        bottomSheetCallback?.let { callback ->
-            bottomSheetBehavior.addBottomSheetCallback(callback)
+        bottomSheetCallback?.let {
+            bottomSheetBehavior.addBottomSheetCallback(it)
         }
     }
 
@@ -123,15 +134,11 @@ class PlaylistInfoFragment : Fragment() {
 
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        binding.overlayPlaylistInfo.visibility = View.VISIBLE
+                        binding.overlayPlaylistInfo.isVisible = true
                     }
-                    BottomSheetBehavior.STATE_COLLAPSED -> {
-                        binding.overlayPlaylistInfo.visibility = View.GONE
+                    else -> {
+                        binding.overlayPlaylistInfo.isVisible = false
                     }
-                    BottomSheetBehavior.STATE_HIDDEN -> {
-                        binding.overlayPlaylistInfo.visibility = View.GONE
-                    }
-                    else -> {}
                 }
             }
 
@@ -139,16 +146,16 @@ class PlaylistInfoFragment : Fragment() {
                 if (_binding == null) return
 
                 if (slideOffset > 0) {
-                    binding.overlayPlaylistInfo.visibility = View.VISIBLE
+                    binding.overlayPlaylistInfo.isVisible = true
                     binding.overlayPlaylistInfo.alpha = slideOffset.coerceIn(0f, 0.5f)
                 } else {
-                    binding.overlayPlaylistInfo.visibility = View.GONE
+                    binding.overlayPlaylistInfo.isVisible = false
                 }
             }
         }
 
-        menuBottomSheetCallback?.let { callback ->
-            menuBottomSheetBehavior.addBottomSheetCallback(callback)
+        menuBottomSheetCallback?.let {
+            menuBottomSheetBehavior.addBottomSheetCallback(it)
         }
 
         binding.overlayPlaylistInfo.setOnClickListener {
@@ -211,25 +218,22 @@ class PlaylistInfoFragment : Fragment() {
             trackAdapter.updateTracks(tracks)
 
             if (tracks.isNotEmpty()) {
-                binding.playlistInfoTracksBottomSheet.visibility = View.VISIBLE
-                binding.playlistInfoTracksBottomSheetContent.visibility = View.VISIBLE
+                binding.playlistInfoTracksBottomSheet.isVisible = true
+                binding.playlistInfoTracksBottomSheetContent.isVisible = true
                 binding.trackCountPlaylistInfo.text = resources.getQuantityString(
                     R.plurals.track_count,
                     tracks.size,
                     tracks.size
                 )
             } else {
-                binding.playlistInfoTracksBottomSheet.visibility = View.GONE
-                binding.playlistInfoTracksBottomSheetContent.visibility = View.GONE
+                binding.playlistInfoTracksBottomSheet.isVisible = false
+                binding.playlistInfoTracksBottomSheetContent.isVisible = false
                 binding.trackCountPlaylistInfo.text = resources.getQuantityString(
                     R.plurals.track_count,
                     0,
                     0
                 )
             }
-        }
-
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
         }
     }
 
@@ -238,9 +242,9 @@ class PlaylistInfoFragment : Fragment() {
 
         if (!playlist.description.isNullOrEmpty()) {
             binding.descriptionPlaylistInfo.text = playlist.description
-            binding.descriptionPlaylistInfo.visibility = View.VISIBLE
+            binding.descriptionPlaylistInfo.isVisible = true
         } else {
-            binding.descriptionPlaylistInfo.visibility = View.GONE
+            binding.descriptionPlaylistInfo.isVisible = false
         }
 
         loadPlaylistCover(playlist.coverPath, binding.imagePlaylistInfo)
@@ -414,7 +418,7 @@ class PlaylistInfoFragment : Fragment() {
     }
 
     private fun showMenuBottomSheet() {
-        binding.playlistInfoMenuBottomSheet.visibility = View.VISIBLE
+        binding.playlistInfoMenuBottomSheet.isVisible = true
         menuBottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
@@ -447,16 +451,20 @@ class PlaylistInfoFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
 
-        bottomSheetCallback?.let { callback ->
-            bottomSheetBehavior.removeBottomSheetCallback(callback)
+        bottomSheetCallback?.let {
+            bottomSheetBehavior.removeBottomSheetCallback(it)
         }
 
-        menuBottomSheetCallback?.let { callback ->
-            menuBottomSheetBehavior.removeBottomSheetCallback(callback)
+        menuBottomSheetCallback?.let {
+            menuBottomSheetBehavior.removeBottomSheetCallback(it)
         }
 
         bottomSheetCallback = null
         menuBottomSheetCallback = null
         _binding = null
+    }
+
+    companion object {
+        const val PLAYLIST_ID_KEY = "playlist_id"
     }
 }

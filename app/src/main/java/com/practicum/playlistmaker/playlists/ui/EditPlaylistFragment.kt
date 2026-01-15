@@ -16,6 +16,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -36,8 +37,7 @@ import java.util.Locale
 class EditPlaylistFragment : Fragment() {
 
     companion object {
-        const val TAG = "EditPlaylistFragment"
-        const val ARG_PLAYLIST_ID = "playlist_id"
+        const val PLAYLIST_ID_KEY = "playlist_id"
     }
 
     private var _binding: FragmentCreatePlaylistBinding? = null
@@ -79,16 +79,16 @@ class EditPlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        playlistId = arguments?.getLong(ARG_PLAYLIST_ID) ?: -1L
+        binding.newPlaylist.text = getString(R.string.edit_playlist)
+        binding.create.text = getString(R.string.save)
+
+        playlistId = arguments?.getLong(PLAYLIST_ID_KEY) ?: -1L
 
         if (playlistId == -1L) {
             Toast.makeText(requireContext(), "Ошибка: ID плейлиста не найден", Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
             return
         }
-
-        binding.titlePlaylistHolder.text = getString(R.string.edit_playlist)
-        binding.create.text = getString(R.string.save)
 
         setupViews()
         setupObservers()
@@ -112,9 +112,9 @@ class EditPlaylistFragment : Fragment() {
                     binding.titlePlaylist.setText(playlist.name)
                     binding.descriptionPlaylist.setText(playlist.description ?: "")
 
-                    binding.titlePlaylistHolder.visibility = View.VISIBLE
+                    binding.titlePlaylistHolder.isVisible = true
                     if (playlist.description?.isNotEmpty() == true) {
-                        binding.descriptionPlaylistHolder.visibility = View.VISIBLE
+                        binding.descriptionPlaylistHolder.isVisible = true
                     }
 
                     playlist.coverPath?.let { coverPath ->
@@ -169,11 +169,7 @@ class EditPlaylistFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 viewModel.updateTitle(s?.toString() ?: "")
-                if (s.isNullOrEmpty()) {
-                    binding.titlePlaylistHolder.visibility = View.GONE
-                } else {
-                    binding.titlePlaylistHolder.visibility = View.VISIBLE
-                }
+                binding.titlePlaylistHolder.isVisible = !s.isNullOrEmpty()
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -184,11 +180,7 @@ class EditPlaylistFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 viewModel.updateDescription(s?.toString() ?: "")
-                if (s.isNullOrEmpty()) {
-                    binding.descriptionPlaylistHolder.visibility = View.GONE
-                } else {
-                    binding.descriptionPlaylistHolder.visibility = View.VISIBLE
-                }
+                binding.descriptionPlaylistHolder.isVisible = !s.isNullOrEmpty()
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -239,7 +231,7 @@ class EditPlaylistFragment : Fragment() {
             .error(R.drawable.ic_placeholder_3)
             .into(binding.image)
 
-        binding.placeholder.visibility = View.GONE
+        binding.placeholder.isVisible = false
     }
 
     private fun savePlaylist() {
@@ -355,13 +347,11 @@ class EditPlaylistFragment : Fragment() {
     }
 
     private fun hideBottomNavigation() {
-        val rootActivity = activity as? com.practicum.playlistmaker.root.ui.RootActivity
-        rootActivity?.binding?.bottomNavigationView?.visibility = View.GONE
+        (activity as? com.practicum.playlistmaker.root.ui.RootActivity)?.binding?.bottomNavigationView?.isVisible = false
     }
 
     private fun showBottomNavigation() {
-        val rootActivity = activity as? com.practicum.playlistmaker.root.ui.RootActivity
-        rootActivity?.binding?.bottomNavigationView?.visibility = View.VISIBLE
+        (activity as? com.practicum.playlistmaker.root.ui.RootActivity)?.binding?.bottomNavigationView?.isVisible = true
     }
 
     override fun onDestroyView() {

@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker.playlists.domain
 
-import com.practicum.playlistmaker.favorites.data.db.FavoriteTracksDao
 import com.practicum.playlistmaker.playlists.data.db.PlaylistEntity
 import com.practicum.playlistmaker.playlists.domain.model.Playlist
 import com.practicum.playlistmaker.search.domain.Track
@@ -8,11 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class PlaylistsInteractorImpl @Inject constructor(
-    private val repository: PlaylistsRepository,
-    private val favoriteTracksDao: FavoriteTracksDao
+class PlaylistsInteractorImpl(
+    private val repository: PlaylistsRepository
 ) : PlaylistsInteractor {
 
     override suspend fun addTrackToPlaylist(playlistId: Long, track: Track): Boolean {

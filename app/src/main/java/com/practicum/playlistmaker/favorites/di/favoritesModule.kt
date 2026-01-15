@@ -36,6 +36,10 @@ val favoritesModule = module {
         get<FavoritesDatabase>().playlistTracksDao()
     }
 
+    single {
+        get<FavoritesDatabase>().playlistTrackDetailsDao()
+    }
+
     single<FavoritesRepository> {
         FavoritesRepositoryImpl(dao = get())
     }
